@@ -31,6 +31,10 @@ for (const [rel, sha] of Object.entries(manifest.files)) {
 
 Re-copy the four vendored items from the kit version being adopted, in one commit. `manifest.kitVersion` and `manifest.registryVersion` pin exactly what was vendored.
 
+## 4. Files left in the target tree
+
+`writeJsonAtomic` rotates a `<file>.bak` copy of every existing config it replaces, and `recordOwnership` writes `.harness-kit/ownership.json` at the target root. Consumers decide gitignore policy for `*.bak` and `.harness-kit/`.
+
 ## Migration rules (strangler)
 
 - Each consumer migrates behind its existing install test suite, plus a golden byte-diff gate: snapshot every config file the installer writes before the migration, run it after, require an empty diff.
