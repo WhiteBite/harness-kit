@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 /** harness-kit self-test: registry validation, sabotage fixtures, forward compatibility, and a two-owner coexistence sweep over every mergeable registry row. */
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { loadRegistry, validateRegistry } from '../src/registry.mjs';
 import { mergeHooks } from '../src/merge.mjs';
+import { writeMarkerBlock } from '../src/marker.mjs';
+import { checkDrift, collectCommands, extractCliPath } from '../src/drift.mjs';
 
 let failures = 0;
 
@@ -50,25 +55,6 @@ function emptyTemplateFor(shape) {
   if (shape === 'root-events') return {};
   if (shape === 'hooks-array') return { hooks: [] };
   return { hooks: {} };
-}
-
-function collectCommands(config, shape) {
-  const commands = [];
-  const walkEntry = (entry) => {
-    if (!entry || typeof entry !== 'object') return;
-    if (typeof entry.command === 'string') commands.push(entry.command);
-    if (entry.action && typeof entry.action.command === 'string') commands.push(entry.action.command);
-    if (Array.isArray(entry.hooks)) entry.hooks.forEach(walkEntry);
-  };
-  if (shape === 'hooks-array') {
-    (Array.isArray(config.hooks) ? config.hooks : []).forEach(walkEntry);
-    return commands;
-  }
-  const container = shape === 'root-events' ? config : config.hooks || {};
-  for (const entries of Object.values(container)) {
-    if (Array.isArray(entries)) entries.forEach(walkEntry);
-  }
-  return commands;
 }
 
 const registry = loadRegistry();
@@ -134,21 +120,74 @@ check('coexistence sweep: two owners merge, reinstall byte-identical, uninstall 
     const shape = hooks.shape;
     const step1 = mergeHooks({}, templateFor(shape, MINE), { shape, isMine });
     const step2 = mergeHooks(step1, templateFor(shape, THEIRS), { shape, isMine: () => false });
-    const commands = collectCommands(step2, shape);
+    const commands = collectCommands(step2, { shape });
     assert(commands.includes(MINE), `${id}: own entry lost after foreign merge`);
     assert(commands.includes(THEIRS), `${id}: foreign entry missing`);
 
     const reinstall = mergeHooks(step2, templateFor(shape, MINE), { shape, isMine });
-    const ownAgain = collectCommands(reinstall, shape).filter(isMine);
+    const ownAgain = collectCommands(reinstall, { shape }).filter(isMine);
     assert(ownAgain.length === 1, `${id}: reinstall must not duplicate own entries, got ${ownAgain.length}`);
 
     const uninstalled = mergeHooks(reinstall, emptyTemplateFor(shape), { shape, isMine });
-    const remaining = collectCommands(uninstalled, shape);
+    const remaining = collectCommands(uninstalled, { shape });
     assert(!remaining.some(isMine), `${id}: uninstall left own entries behind`);
     assert(remaining.includes(THEIRS), `${id}: uninstall removed a foreign entry`);
     swept += 1;
   }
   assert(swept >= 5, `expected at least 5 mergeable harness rows, swept ${swept}`);
+});
+
+function withTemp(fn) {
+  const dir = mkdtempSync(join(tmpdir(), 'hk-selftest-'));
+  try {
+    fn(dir);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+check('sabotage: marker writer rejects a variant without its discriminator', () => {
+  withTemp((dir) => {
+    let message = null;
+    try {
+      writeMarkerBlock(join(dir, 'x'), '# >>> id >>>\n', { variant: 'shell-block' });
+    } catch (error) {
+      message = error && error.message;
+    }
+    assert(message !== null && /id/.test(message), 'shell-block without id must be rejected');
+  });
+});
+
+check('sabotage: marker writer rejects an unknown variant', () => {
+  withTemp((dir) => {
+    let message = null;
+    try {
+      writeMarkerBlock(join(dir, 'x'), 'x', { variant: 'sideways' });
+    } catch (error) {
+      message = error && error.message;
+    }
+    assert(message !== null && /variant/.test(message), 'unknown marker variant must be rejected');
+  });
+});
+
+check('drift: collectCommands and extractCliPath read every merge shape', () => {
+  assert(collectCommands({ hooks: { PreToolUse: [{ command: MINE }] } }, { shape: 'nested-hooks' }).includes(MINE), 'nested leaf command must be collected');
+  assert(collectCommands({ PreToolUse: [{ hooks: [{ command: MINE }] }] }, { shape: 'root-events' }).includes(MINE), 'root-events command must be collected');
+  assert(extractCliPath('bun "/x/src/cli.ts" pre') === '/x/src/cli.ts', 'extractCliPath must parse a quoted .ts token');
+});
+
+check('sabotage: drift statuses stay inside the vocabulary', () => {
+  const vocabulary = new Set(['broken', 'missing', 'stale', 'ok']);
+  const identify = (command) => typeof command === 'string' && command.includes('--harness x');
+  const configFor = (command) => ({ hooks: { PreToolUse: [{ hooks: [{ command }] }] } });
+  const scenarios = [
+    checkDrift({ parseError: true }, { shape: 'nested-hooks', identify, pathExists: () => true }),
+    checkDrift({ config: configFor('node /foreign.js') }, { shape: 'nested-hooks', identify, pathExists: () => true }),
+    checkDrift({ config: configFor('bun "/gone/cli.ts" pre --harness x') }, { shape: 'nested-hooks', identify, pathExists: () => false }),
+    checkDrift({ config: configFor('bun "/here/cli.ts" pre --harness x') }, { shape: 'nested-hooks', identify, pathExists: () => true }),
+  ];
+  for (const result of scenarios) assert(vocabulary.has(result.status), `unexpected drift status ${JSON.stringify(result.status)}`);
+  assert(scenarios.map((result) => result.status).sort().join(',') === 'broken,missing,ok,stale', 'all four drift statuses must be produced');
 });
 
 console.log(failures === 0 ? `\nself-test: all checks passed` : `\nself-test: ${failures} check(s) FAILED`);

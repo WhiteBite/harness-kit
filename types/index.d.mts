@@ -69,6 +69,55 @@ export function mergeHooks(
   options: { shape: MergeShape; isMine: (command: unknown) => boolean },
 ): Record<string, unknown>;
 
+export type MarkerBlockAction = 'created' | 'replaced' | 'appended' | 'unchanged' | 'skipped-foreign';
+export interface MarkerBlockResult {
+  action: MarkerBlockAction;
+}
+
+export interface ShellBlockOpts {
+  variant: 'shell-block';
+  id: string;
+  shebang?: string;
+  executable?: boolean;
+}
+export interface HtmlBlockOpts {
+  variant: 'html-block';
+  id: string;
+}
+export interface FirstLineMarkerOpts {
+  variant: 'first-line-marker';
+  marker: string;
+}
+export interface MdcFrontmatterOpts {
+  variant: 'mdc-frontmatter';
+  fields: ReadonlyArray<readonly [string, string]>;
+  body: string;
+}
+export type WriteMarkerBlockOpts = ShellBlockOpts | HtmlBlockOpts | FirstLineMarkerOpts | MdcFrontmatterOpts;
+
+/** `block` is the full caller-assembled text for shell/html/first-line; mdc-frontmatter builds bytes from fields + body and ignores it. */
+export function writeMarkerBlock(path: string, block: string, opts: WriteMarkerBlockOpts): MarkerBlockResult;
+
+export type DriftStatus = 'broken' | 'missing' | 'stale' | 'ok';
+export interface DriftResult {
+  status: DriftStatus;
+  detail: string | null;
+}
+export interface CheckDriftInput {
+  parseError?: boolean;
+  config?: Record<string, unknown>;
+}
+export interface CheckDriftOpts {
+  shape: MergeShape;
+  identify: (command: unknown) => boolean;
+  pathExists: (cliPath: string) => boolean;
+  isMine?: (command: unknown) => boolean;
+}
+
+export function extractCliPath(command: unknown): string | null;
+export function collectCommands(config: Record<string, unknown>, options: { shape: MergeShape }): string[];
+export function checkDrift(input: CheckDriftInput, options: CheckDriftOpts): DriftResult;
+
 export declare class ConfigParseError extends Error {
   path: string;
 }
