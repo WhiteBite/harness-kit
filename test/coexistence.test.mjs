@@ -168,8 +168,38 @@ test('versioned-flat shape (cursor): envelope kept, flat entries filtered by com
   assert.equal(merged.hooks.preToolUse[0].command, DEJAVU_COMMAND);
 
   const uninstalled = mergeHooks(merged, { hooks: {} }, { shape: 'versioned-flat', isMine: isDejavu });
-  assert.equal(uninstalled.hooks.preToolUse.length, 0);
+  assert.equal(uninstalled.hooks.preToolUse, undefined, 'an emptied event key is dropped, not left as []');
   assert.deepEqual(uninstalled.hooks.beforeShellExecution, [{ command: 'node /foreign.js', timeout: 9 }]);
+});
+
+test('uninstall via an empty template leaves no empty event keys (nested-hooks and root-events)', () => {
+  const nested = mergeHooks(
+    { hooks: { PreToolUse: [{ matcher: 'Write', hooks: [{ type: 'command', command: SLOP_COMMAND }] }] } },
+    { hooks: {} },
+    { shape: 'nested-hooks', isMine: isSlop },
+  );
+  assert.deepEqual(nested.hooks, {}, 'an event emptied by stripping must be deleted, not left as []');
+
+  const nestedMixed = mergeHooks(
+    {
+      hooks: {
+        PreToolUse: [
+          { matcher: 'Write', hooks: [{ type: 'command', command: SLOP_COMMAND }] },
+          { matcher: 'Bash', hooks: [{ type: 'command', command: 'node /foreign.js' }] },
+        ],
+      },
+    },
+    { hooks: {} },
+    { shape: 'nested-hooks', isMine: isSlop },
+  );
+  assert.equal(nestedMixed.hooks.PreToolUse.length, 1, 'an event with a surviving foreign entry must keep its key');
+
+  const root = mergeHooks(
+    { PreToolUse: [{ hooks: [{ type: 'command', command: SLOP_COMMAND }] }] },
+    {},
+    { shape: 'root-events', isMine: isSlop },
+  );
+  assert.deepEqual(root, {}, 'an emptied root event must be deleted, not left as []');
 });
 
 test('ownership sidecar: records survive re-read, hash detects tampering, fallback never claims foreign entries', () => {

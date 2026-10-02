@@ -100,7 +100,9 @@ export function mergeHooks(existing, template, { shape, isMine }) {
   for (const [event, entries] of Object.entries(container)) {
     if (!rootScoped && event === 'hooks') continue;
     if (!Array.isArray(entries)) continue;
-    container[event] = grouped ? stripGroups(entries, isMine) : stripLeaves(entries, isMine);
+    const stripped = grouped ? stripGroups(entries, isMine) : stripLeaves(entries, isMine);
+    if (stripped.length === 0) delete container[event];
+    else container[event] = stripped;
   }
 
   const templateEvents = rootScoped ? template : eventMapOf(template.hooks, 'template .hooks');
@@ -108,7 +110,9 @@ export function mergeHooks(existing, template, { shape, isMine }) {
     if (!rootScoped && event === 'hooks') continue;
     if (!Array.isArray(entries)) continue;
     const current = Array.isArray(container[event]) ? container[event] : [];
-    container[event] = [...current, ...entries];
+    const appended = [...current, ...entries];
+    if (appended.length === 0) delete container[event];
+    else container[event] = appended;
   }
 
   return merged;
