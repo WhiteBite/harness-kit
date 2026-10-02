@@ -233,6 +233,28 @@ test('spike: a non-array foreign event is skipped while a sibling event still me
   assert.ok(commands.some(isDejavu), 'template entries for the normal event must be appended');
 });
 
+test('spike: own entries are stripped from every event, re-added only where the template declares them', () => {
+  const seeded = {
+    hooks: {
+      PreToolUse: [
+        { matcher: '^Bash$', hooks: [{ type: 'command', command: DEJAVU_COMMAND }] },
+        { matcher: 'Web', hooks: [{ type: 'command', command: 'node /foreign/pre.js' }] },
+      ],
+      PostToolUse: [
+        { matcher: '^Bash$', hooks: [{ type: 'command', command: DEJAVU_POST_COMMAND }] },
+        { matcher: 'Read', hooks: [{ type: 'command', command: 'node /foreign/post.js' }] },
+      ],
+    },
+  };
+  const template = { hooks: { PreToolUse: dejavuTemplate.hooks.PreToolUse } };
+  const merged = mergeHooks(seeded, template, { shape: 'nested-hooks', isMine: isDejavu });
+  const commands = collectCommands(merged, 'nested-hooks');
+  assert.ok(!commands.includes(DEJAVU_POST_COMMAND), 'own entries under a non-template event are stripped');
+  assert.ok(commands.includes('node /foreign/post.js'), 'foreign entries under that event survive');
+  assert.ok(commands.includes('node /foreign/pre.js'), 'foreign sibling under the template event survives');
+  assert.ok(commands.includes(DEJAVU_COMMAND), 'own entries are re-added where the template declares them');
+});
+
 test('ownership sidecar: records survive re-read, hash detects tampering, fallback never claims foreign entries', () => {
   const dir = mkdtempSync(join(tmpdir(), 'hk-own-'));
   try {
