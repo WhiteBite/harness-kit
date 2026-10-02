@@ -2,8 +2,8 @@
 
 Two tools of the family already wrote the same files (`.codex/hooks.json`, `.devin/hooks.v1.json`) with different identity markers and no shared convention. The kit's rules:
 
-1. **Owner-scoped merge.** Never overwrite a shared file. Strip only entries you own, append your fresh entries, preserve every foreign byte (`mergeHooks`). Re-running the same merge is byte-identical for the same owner.
-2. **Ownership sidecar.** `.harness-kit/ownership.json` records `{owner, file, locator, sha256}` per installed entry. Identity is locator + content hash, not command text.
+1. **Owner-scoped merge.** Never overwrite a shared file. Strip only entries you own, append your fresh entries, preserve every foreign byte (`mergeHooks`). Re-running the same merge is byte-identical once the owner's entries are at the end of each event array (the fixed point); a re-run after another owner installed may move own entries to the end first — the entry SET is the cross-owner contract, byte-identity is per-owner steady state.
+2. **Ownership sidecar.** `.harness-kit/ownership.json` records `{owner, file, locator, sha256}` per installed entry. Identity is locator + content hash, not command text. Locators are positional: another owner's install/uninstall shifts indices and makes `entryMatchesHash` fail for records that were never tampered with. Treat a hash mismatch as "refresh at next own install" (rule 3 fallback), not as tampering, unless the substring predicate also fails.
 3. **Substring fallback.** If the sidecar is missing or a hash mismatches (out-of-band edit), fall back to the consumer's command-substring predicate; on mismatch, warn and never delete.
 4. **Legacy substrings survive migration.** A migrated entry keeps its old substring so an unmigrated tool still recognizes its own entries mid-strangler.
 5. **Overwrite only owned files.** Whole-file writes are allowed only where the path carries the tool id (`.github/hooks/{tool}.json`, `.kiro/hooks/{tool}.json`). The registry self-test enforces this invariant.

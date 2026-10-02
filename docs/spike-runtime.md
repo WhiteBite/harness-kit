@@ -54,7 +54,7 @@ node install.mjs owner-b "node <abs>/owner-b.mjs --harness spike" "--harness spi
 
 - [ ] `.codex/hooks.json` contains both owners' entries (inspect by hand).
 - [ ] Run the harness so it attempts a file write (e.g. `codex exec "create a file hello.txt containing hi"`): **both** `owner-a.log` and `owner-b.log` gain lines.
-- [ ] Re-run owner-a's install → config is byte-identical (compare sha256 before/after).
+- [ ] Re-run owner-a's install → the entry SET is unchanged and owner-a's entries move to the end of each event array; a second re-run is byte-identical (fixed point). Compare sha256 across the second re-run, not the first.
 - [ ] Out-of-band edit: add `"spikeForeign": true` to the config root → re-run owner-b's install → the foreign key survives.
 - [ ] Uninstall owner-a (merge with an empty template `{ hooks: {} }` and its `isMine`) → owner-a entries gone, owner-b still fires on the next harness run.
 - [ ] The harness logs no schema complaints about the merged file at any point.
@@ -66,3 +66,7 @@ All boxes checked ⇒ the sidecar + owner-scoped merge model is runtime-proven a
 ## Cleanup
 
 Delete the scratch repo. No global state was modified; project-scope configs die with the directory.
+
+## Run log
+
+- 2026-10-02, Claude Code 2.1.163 substitution (codex/devin absent), kit frozen at e1b8f1b: file-level assertions 1/4/5 PASS; assertion 3 exposed the cross-owner reorder documented in coexistence.md rule 1 (set preserved, fixed point from the second application) and this runbook's assertion was corrected; runtime assertions 2/6 ENV-BLOCKED — the local claude install is unauthenticated (`claude -p` exits at the login gate before any tool use). Artifacts: `%TEMP%\opencode\hk-spike\artifacts\REPORT.md`. Runtime half remains open: authenticate claude (`claude /login`) and re-run from the preserved scratch, or re-target a harness with live auth.
