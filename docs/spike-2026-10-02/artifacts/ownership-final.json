@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "owner": "owner-b",
+      "file": ".claude/settings.json",
+      "locator": [
+        "hooks",
+        "PreToolUse",
+        1
+      ],
+      "sha256": "038a1b9c3d9aa805bc1740cd93a84a6e91aff5ca5371f3133bb215730bc1b117"
+    }
+  ]
+}
