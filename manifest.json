@@ -5,6 +5,7 @@
   "files": {
     "src/atomic.mjs": "2b7ef169330887417dc4027f0d3c5451a6ac3430e94cb1d9f4aa590304fa52fd",
     "src/index.mjs": "0f62cc4288bf964f480e4bce3b740c8ab63d4fbda068c6270188076b533252cc",
+    "src/marker.mjs": "d1c7f52536e94e1f5d97b53c56248ed966550d19c65a84ea7ec9d819494f3076",
     "src/merge.mjs": "a78bba84f5ee9e4e81fae00a560328009c797aac871c1643fad13bdf2893a20b",
     "src/ownership.mjs": "8e768c012d082d56e46ba0d0f8b2a4c3a4520983f731d8e9c9dbd6c919f59019",
     "src/registry.mjs": "e8b4fbaaf882d8a13c772be586cdc0bd53d668d9ba930e4f7c6194a614685e58",
