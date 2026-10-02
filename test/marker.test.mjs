@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { writeMarkerBlock } from '../src/marker.mjs';
@@ -62,6 +62,20 @@ test('shell-block: executable mode is applied on posix', { skip: process.platfor
   try {
     const path = join(dir, 'pre-commit');
     writeMarkerBlock(path, SHELL_BLOCK, { variant: 'shell-block', id: 'slop-gate' });
+    assert.equal(statSync(path).mode & 0o777, 0o755);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('shell-block: unchanged content still restores the executable bit', { skip: process.platform === 'win32' ? 'chmod semantics differ on Windows' : false }, () => {
+  const dir = temp();
+  try {
+    const path = join(dir, 'pre-commit');
+    writeMarkerBlock(path, SHELL_BLOCK, { variant: 'shell-block', id: 'slop-gate' });
+    chmodSync(path, 0o644);
+    const result = writeMarkerBlock(path, SHELL_BLOCK, { variant: 'shell-block', id: 'slop-gate' });
+    assert.equal(result.action, 'unchanged');
     assert.equal(statSync(path).mode & 0o777, 0o755);
   } finally {
     rmSync(dir, { recursive: true, force: true });
