@@ -61,7 +61,7 @@ const intact = entryMatchesHash(currentConfig, record); // false after any out-o
 
 ## Status
 
-Phase 1: canonical registry (14 harness rows reconciled from three independent implementations), merge/ownership/atomic/template/symlink primitives, test suite, self-test and hash manifest. Adoption by the family tools (repo-aeo, stop-ai-slop, dejavu-gates) is planned behind golden-diff migration gates — see [docs/consumption.md](docs/consumption.md) and [docs/coexistence.md](docs/coexistence.md).
+Phase 2: canonical registry (14 harness rows reconciled from three independent implementations), merge/ownership/atomic/template/symlink/marker-block/drift primitives, test suite, self-test and hash manifest. Adopted by the family tools — repo-aeo (skill symlinks), stop-ai-slop (hooks, rules, pre-commit) and dejavu-gates (merges, templates, drift) each vendor the kit behind a sha256 sync-check and a golden byte-diff gate; see [docs/consumption.md](docs/consumption.md) and [docs/coexistence.md](docs/coexistence.md).
 
 ## License
 
