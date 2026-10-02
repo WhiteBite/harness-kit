@@ -51,7 +51,7 @@ function writeHtmlBlock(path, block, opts) {
   let action;
   let next;
   if (current === null) {
-    next = `${block}\n`;
+    next = block.endsWith('\n') ? block : `${block}\n`;
     action = 'created';
   } else {
     const openIdx = current.indexOf(open);

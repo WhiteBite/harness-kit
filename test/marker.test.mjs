@@ -100,6 +100,19 @@ test('html-block: creates, appends, replaces the token span, and tolerates inver
   }
 });
 
+test('html-block: a block already ending with a newline is created verbatim', () => {
+  const dir = temp();
+  try {
+    const path = join(dir, 'copilot-instructions.md');
+    const block = `${HTML_BLOCK}\n`;
+    const created = writeMarkerBlock(path, block, { variant: 'html-block', id: 'stop-ai-slop' });
+    assert.equal(created.action, 'created');
+    assert.equal(readFileSync(path, 'utf8'), block);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('first-line-marker: creates, replaces its own file, skips foreign first lines, no-ops identical', () => {
   const dir = temp();
   try {
