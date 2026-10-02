@@ -1,6 +1,6 @@
 /** Owner-scoped hook-config merge: strip only the caller's entries, append fresh ones, preserve every foreign byte. */
 
-function entryCommands(entry) {
+export function entryCommands(entry) {
   const commands = [];
   if (!entry || typeof entry !== 'object') return commands;
   if (typeof entry.command === 'string') commands.push(entry.command);
