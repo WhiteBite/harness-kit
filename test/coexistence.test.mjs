@@ -202,6 +202,37 @@ test('uninstall via an empty template leaves no empty event keys (nested-hooks a
   assert.deepEqual(root, {}, 'an emptied root event must be deleted, not left as []');
 });
 
+test('spike: a non-array foreign PreToolUse value survives a nested-hooks install', () => {
+  const seeded = { hooks: { PreToolUse: { legacy: 'object' } } };
+  const merged = mergeHooks(seeded, slopTemplate, { shape: 'nested-hooks', isMine: isSlop });
+  assert.deepEqual(merged.hooks.PreToolUse, { legacy: 'object' });
+});
+
+test('spike: a non-array foreign PreToolUse value survives a root-events install', () => {
+  const seeded = { PreToolUse: { legacy: 'object' } };
+  const template = { PreToolUse: [{ hooks: [{ type: 'command', command: DEJAVU_COMMAND }] }] };
+  const merged = mergeHooks(seeded, template, { shape: 'root-events', isMine: isDejavu });
+  assert.deepEqual(merged.PreToolUse, { legacy: 'object' });
+});
+
+test('spike: a non-array foreign event is skipped while a sibling event still merges', () => {
+  const seeded = {
+    hooks: {
+      PreToolUse: { legacy: 'object' },
+      PostToolUse: [
+        { matcher: 'Write', hooks: [{ type: 'command', command: SLOP_COMMAND }] },
+        { matcher: 'Bash', hooks: [{ type: 'command', command: 'node /foreign/post.js' }] },
+      ],
+    },
+  };
+  const merged = mergeHooks(seeded, dejavuTemplate, { shape: 'nested-hooks', isMine: isSlop });
+  assert.deepEqual(merged.hooks.PreToolUse, { legacy: 'object' });
+  const commands = collectCommands(merged, 'nested-hooks');
+  assert.ok(!commands.some(isSlop), 'own entries under the normal event must be stripped');
+  assert.ok(commands.includes('node /foreign/post.js'), 'foreign sibling entry must survive');
+  assert.ok(commands.some(isDejavu), 'template entries for the normal event must be appended');
+});
+
 test('ownership sidecar: records survive re-read, hash detects tampering, fallback never claims foreign entries', () => {
   const dir = mkdtempSync(join(tmpdir(), 'hk-own-'));
   try {

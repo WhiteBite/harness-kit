@@ -137,6 +137,25 @@ check('coexistence sweep: two owners merge, reinstall byte-identical, uninstall 
   assert(swept >= 5, `expected at least 5 mergeable harness rows, swept ${swept}`);
 });
 
+check('coexistence sweep: a non-array foreign event value survives verbatim', () => {
+  let swept = 0;
+  for (const [id, entry] of Object.entries(registry.harnesses)) {
+    const hooks = entry.hooks;
+    if (!hooks || hooks.write !== 'merge' || hooks.shape === 'hooks-array') continue;
+    const shape = hooks.shape;
+    const template = templateFor(shape, MINE);
+    const nested = shape !== 'root-events';
+    const event = Object.keys(nested ? template.hooks : template)[0];
+    const foreign = { legacy: 'object' };
+    const seeded = nested ? { hooks: { [event]: foreign } } : { [event]: foreign };
+    const merged = mergeHooks(seeded, template, { shape, isMine });
+    const survived = nested ? merged.hooks[event] : merged[event];
+    assert(JSON.stringify(survived) === JSON.stringify(foreign), `${id}: non-array foreign event value must survive verbatim`);
+    swept += 1;
+  }
+  assert(swept >= 5, `expected at least 5 event-map merge rows, swept ${swept}`);
+});
+
 function withTemp(fn) {
   const dir = mkdtempSync(join(tmpdir(), 'hk-selftest-'));
   try {
