@@ -7,11 +7,13 @@ This file follows the llms.txt convention: a short, LLM-friendly index of the pr
 
 ## Docs
 
-- [README.md](./README.md): installation, usage and examples
+- [Homepage](https://github.com/WhiteBite/harness-kit): project landing page
+- [Issues](https://github.com/WhiteBite/harness-kit/issues): roadmap and known gaps
+- [README.md](./README.md): install, run and test instructions
 
 ## Key facts
 
-- Install: `npm install @whitebite/harness-kit`
+- Install: `npm install`
 - Test: `npm run test`
 
 ## Optional

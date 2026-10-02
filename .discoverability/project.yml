@@ -45,7 +45,7 @@ keywords:
     - "open-source"   # 5-15 terms for package.json keywords
 
 links:
-  homepage:
+  homepage: "https://github.com/WhiteBite/harness-kit"
   docs:
   demo:
   issues:
@@ -53,7 +53,7 @@ links:
 quickstart:
   prerequisites:
     - "Node.js >= 18"
-  install: "npm install @whitebite/harness-kit"
+  install: "npm install"
   run:
   test: "npm run test"
 

@@ -43,5 +43,10 @@
     "zero-dependencies",
     "open-source"
   ],
-  "author": "WhiteBite"
+  "author": "WhiteBite",
+  "repository": "https://github.com/WhiteBite/harness-kit",
+  "bugs": {
+    "url": "https://github.com/WhiteBite/harness-kit/issues"
+  },
+  "homepage": "https://github.com/WhiteBite/harness-kit"
 }
