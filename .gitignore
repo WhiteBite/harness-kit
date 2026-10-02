@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+*.log
+.DS_Store
+.env
+.omo/
+.opencode/
+.codegraph/
+.codenomad/
+.playwright-mcp/

@@ -1,0 +1,25 @@
+<!-- rdk:generated:start -->
+# @whitebite/harness-kit
+
+> Canonical registry and zero-dependency primitives for wiring AI coding harnesses (Claude Code, Codex, OpenCode 1.x/2.x, Gemini, Qwen, Cursor, Windsurf, Kiro, Devin, Copilot, Crush, Cline, Aider): config paths, hook dialects, owner-scoped merges, skill symlinks, marker blocks.
+
+This file follows the llms.txt convention: a short, LLM-friendly index of the project.
+
+## Docs
+
+- [README.md](./README.md): installation, usage and examples
+
+## Key facts
+
+- Install: `npm install @whitebite/harness-kit`
+- Test: `npm run test`
+
+## Optional
+
+- [llms-full.txt](./llms-full.txt): the full documentation in a single file
+- [AGENTS.md](./AGENTS.md): instructions for coding agents
+<!-- rdk:generated:end -->
+
+## Hand-written notes
+
+<!-- Everything below the end marker is preserved by `rdk fix`. Put hand-written context here; the block above is regenerated from .discoverability/project.yml. -->
