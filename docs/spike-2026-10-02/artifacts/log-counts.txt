@@ -1,3 +1,0 @@
-before-run1: owner-a.log=0 owner-b.log=0
-after-run1: owner-a.log=0 owner-b.log=0
-final-state: owner-a.log=0 owner-b.log=0

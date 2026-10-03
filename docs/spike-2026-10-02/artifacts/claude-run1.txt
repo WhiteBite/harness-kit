@@ -1,2 +1,0 @@
-Not logged in ┬╖ Please run /login
-exit code: 1

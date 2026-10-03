@@ -1,2 +1,0 @@
-harness-kit HEAD (frozen snapshot source): e1b8f1bddbba267cc7bc1f66cab4a47236dd976f
-frozen: 2026-10-02T15:31:52.4558318+03:00
