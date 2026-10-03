@@ -48,7 +48,10 @@
     "open-source"
   ],
   "author": "WhiteBite",
-  "repository": "https://github.com/WhiteBite/harness-kit",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WhiteBite/harness-kit.git"
+  },
   "bugs": {
     "url": "https://github.com/WhiteBite/harness-kit/issues"
   },
