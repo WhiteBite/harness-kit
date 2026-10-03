@@ -1,0 +1,69 @@
+name: publish
+
+# Tag push = npm publish: OIDC trusted publishing, skip-if-published.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run everything except `npm publish` (recommended first)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Test suite
+        run: npm test
+
+      - name: Exchange OIDC token for registry token
+        run: |
+          name=$(node -p "require('./package.json').name")
+          id_token=$(curl -s -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm:registry.npmjs.org" | jq -r '.value')
+          response=$(curl -s -w "\n%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer $id_token" \
+            -H "Content-Type: application/json" \
+            "https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/$name")
+          http_code=$(echo "$response" | tail -1)
+          body=$(echo "$response" | head -n -1)
+          if [ "$http_code" = "201" ]; then
+            token=$(echo "$body" | jq -r '.token')
+            echo "NODE_AUTH_TOKEN=$token" >> "$GITHUB_ENV"
+            echo "OIDC exchange succeeded for $name"
+          else
+            echo "OIDC exchange failed for $name: HTTP $http_code"
+            echo "$body"
+            exit 1
+          fi
+
+      - name: Publish
+        run: |
+          name=$(node -p "require('./package.json').name")
+          local=$(node -p "require('./package.json').version")
+          published=$(npm view "$name" version 2>/dev/null || echo none)
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            npm publish --dry-run --access public
+          elif [ "$local" = "$published" ]; then
+            echo "$name@$local is already in the registry; skipping"
+          else
+            npm publish --access public
+          fi
