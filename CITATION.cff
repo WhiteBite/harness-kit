@@ -7,7 +7,7 @@ type: software
 authors:
   - name: "WhiteBite"
     # orcid / affiliation optional
-repository-code: ""
+repository-code: "https://github.com/WhiteBite/harness-kit"
 abstract: "Canonical registry and zero-dependency primitives for wiring AI coding harnesses (Claude Code, Codex, OpenCode 1.x/2.x, Gemini, Qwen, Cursor, Windsurf, Kiro, Devin, Copilot, Crush, Cline, Aider): config paths, hook dialects, owner-scoped merges, skill symlinks, marker blocks."
 keywords:
   - "ai-harness"

@@ -15,7 +15,6 @@
   "codeRepository": "https://github.com/WhiteBite/harness-kit",
   "author": "WhiteBite",
   "sameAs": [
-    "https://github.com/WhiteBite/harness-kit",
-    "https://www.npmjs.com/package/@whitebite/harness-kit"
+    "https://github.com/WhiteBite/harness-kit"
   ]
 }
