@@ -11,6 +11,8 @@ This is the concatenated documentation intended for LLM grounding. Regenerate wi
 
 # harness-kit
 
+**English** | [Русский](README.ru.md)
+
 > One canonical registry and zero-dependency primitives for wiring AI coding harnesses — Claude Code, Codex CLI, OpenCode 1.x/2.x, Gemini CLI, Qwen, Cursor, Windsurf, Kiro, Devin, VS Code Copilot, Crush, Cline, Aider — so tools stop re-implementing config paths, merge semantics and symlink installs each their own way.
 
 ## Quickstart
@@ -21,7 +23,7 @@ npm test
 npm run self-test
 ```
 
-Zero runtime dependencies, Node >= 18, plain ESM (Bun-compatible). Not published to npm yet — vendor it from source (see [docs/consumption.md](docs/consumption.md)).
+Zero runtime dependencies, Node >= 18, plain ESM (Bun-compatible). Published to npm as `@whitebite/harness-kit`; deep integrations still vendor the sources behind the sha256 manifest (see [docs/consumption.md](docs/consumption.md)).
 
 ## Who is it for
 

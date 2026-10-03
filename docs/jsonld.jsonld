@@ -11,7 +11,7 @@
   "license": "https://opensource.org/licenses/MIT",
   "keywords": "ai-harness, claude-code, codex-cli, opencode, gemini-cli, cursor, kiro, devin, copilot, hooks, agent-skills, installer, registry, zero-dependencies, open-source",
   "url": "https://github.com/WhiteBite/harness-kit",
-  "softwareVersion": "0.3.0",
+  "softwareVersion": "0.3.1",
   "codeRepository": "https://github.com/WhiteBite/harness-kit",
   "author": "WhiteBite",
   "sameAs": [

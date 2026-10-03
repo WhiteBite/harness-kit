@@ -12,7 +12,7 @@ npm test
 npm run self-test
 ```
 
-Zero runtime dependencies, Node >= 18, plain ESM (Bun-compatible). Not published to npm yet — vendor it from source (see [docs/consumption.md](docs/consumption.md)).
+Zero runtime dependencies, Node >= 18, plain ESM (Bun-compatible). Published to npm as `@whitebite/harness-kit`; deep integrations still vendor the sources behind the sha256 manifest (see [docs/consumption.md](docs/consumption.md)).
 
 ## Who is it for
 

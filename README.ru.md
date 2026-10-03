@@ -12,7 +12,7 @@ npm test
 npm run self-test
 ```
 
-Нулевые рантайм-зависимости, Node >= 18, чистый ESM (совместим с Bun). В npm ещё не опубликован — вендорите из исходников (см. [docs/consumption.md](docs/consumption.md)).
+Нулевые рантайм-зависимости, Node >= 18, чистый ESM (совместим с Bun). Опубликован в npm как `@whitebite/harness-kit`; глубокие интеграции по-прежнему вендорят исходники за sha256-манифестом (см. [docs/consumption.md](docs/consumption.md)).
 
 ## Кому это нужно
 
