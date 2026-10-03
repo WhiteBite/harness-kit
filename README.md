@@ -1,5 +1,7 @@
 # harness-kit
 
+**English** | [Русский](README.ru.md)
+
 > One canonical registry and zero-dependency primitives for wiring AI coding harnesses — Claude Code, Codex CLI, OpenCode 1.x/2.x, Gemini CLI, Qwen, Cursor, Windsurf, Kiro, Devin, VS Code Copilot, Crush, Cline, Aider — so tools stop re-implementing config paths, merge semantics and symlink installs each their own way.
 
 ## Quickstart
