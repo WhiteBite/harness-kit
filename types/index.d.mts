@@ -127,6 +127,40 @@ export function extractCliPath(command: unknown, matcher?: RegExp): string | nul
 export function collectCommands(config: Record<string, unknown>, options: { shape: MergeShape }): string[];
 export function checkDrift(input: CheckDriftInput, options: CheckDriftOpts): DriftResult;
 
+export interface Finding {
+  surface: string;
+  status: DriftStatus;
+  detail: string | null;
+}
+
+export interface HookConfigSurface {
+  id: string;
+  kind: 'hook-config';
+  path: string;
+  shape: MergeShape;
+  identify: (command: unknown) => boolean;
+  extract?: (command: unknown) => string | null;
+}
+
+export interface MarkerBlockSurface {
+  id: string;
+  kind: 'marker-block';
+  path: string;
+  variant: 'shell-block';
+  markerId: string;
+  extract?: (text: string) => string | null;
+}
+
+export type InstallSurface = HookConfigSurface | MarkerBlockSurface;
+
+export interface CheckInstallOpts {
+  surfaces?: InstallSurface[];
+  pathExists?: (path: string) => boolean;
+}
+
+export function checkInstall(root: string, opts?: CheckInstallOpts): Finding[];
+export function resolveHooksDir(root: string, opts?: { exec?: (args: string[], cwd: string) => string }): string | null;
+
 export declare class ConfigParseError extends Error {
   path: string;
 }

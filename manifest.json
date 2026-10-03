@@ -4,8 +4,9 @@
   "registryVersion": "0.1.0",
   "files": {
     "src/atomic.mjs": "2b7ef169330887417dc4027f0d3c5451a6ac3430e94cb1d9f4aa590304fa52fd",
+    "src/doctor.mjs": "8d5a69fbfa920639d41eb847d1d3283a0407bf449c30b16c5059570a27e6107c",
     "src/drift.mjs": "eb9fac3dcc775d5e9a6bcdf91d57fbba1de31beb9d892a8dddd08d164ed2d99d",
-    "src/index.mjs": "49ae6372252c6ae48fbb6c677e68c23c2f2164fe74d5660ce08cf276bef131dc",
+    "src/index.mjs": "14422d9b5573c1d837d9c59ccbc662ba8eca559fa7ec0cbccedda7812a8971a5",
     "src/marker.mjs": "57d8e605c1b7ff3f98f6bc2f2710b40d2f8ffeb853417d66ba3cb8298839a435",
     "src/merge.mjs": "c0c666167c22d22091de211642615d6844d6a99202888a6e24582e124ad93ba5",
     "src/ownership.mjs": "8e768c012d082d56e46ba0d0f8b2a4c3a4520983f731d8e9c9dbd6c919f59019",
@@ -15,6 +16,6 @@
     "registry/CHANGELOG.md": "8740ba3c7ef0098b01619b580d5c566c89bc3a8b0a46c5ce878b9a9eea88da9b",
     "registry/harnesses.json": "4554ab8fff7fd6c6b06292016e737d48c925b838d6c65d8a5294bd35d44bd152",
     "registry/harnesses.schema.json": "b73abef890e0ee424bb2f9e4515ceacf2ca98efdf42d16f2873cf8a9dba53b94",
-    "types/index.d.mts": "27ec0e1e5db8c852c6e3b52b33bba02cab7cfdebedf807eea2def11306ffe08e"
+    "types/index.d.mts": "83132fd6094f894777b41b0ebd62f87b593c21487a1e26068ec4cfafb54f56e3"
   }
 }

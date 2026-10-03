@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 /** harness-kit self-test: registry validation, sabotage fixtures, forward compatibility, and a two-owner coexistence sweep over every mergeable registry row. */
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { loadRegistry, validateRegistry } from '../src/registry.mjs';
 import { mergeHooks } from '../src/merge.mjs';
 import { writeMarkerBlock } from '../src/marker.mjs';
 import { checkDrift, collectCommands, extractCliPath } from '../src/drift.mjs';
+import { checkInstall } from '../src/doctor.mjs';
 
 let failures = 0;
 
@@ -207,6 +208,22 @@ check('sabotage: drift statuses stay inside the vocabulary', () => {
   ];
   for (const result of scenarios) assert(vocabulary.has(result.status), `unexpected drift status ${JSON.stringify(result.status)}`);
   assert(scenarios.map((result) => result.status).sort().join(',') === 'broken,missing,ok,stale', 'all four drift statuses must be produced');
+});
+
+check('sabotage: checkInstall statuses stay inside the drift vocabulary', () => {
+  withTemp((dir) => {
+    const vocabulary = new Set(['broken', 'missing', 'stale', 'ok']);
+    writeFileSync(join(dir, 'hooks.json'), JSON.stringify({ hooks: { PreToolUse: [{ hooks: [{ command: MINE }, { command: THEIRS }] }] } }));
+    const surfaces = [
+      { id: 'unknown-kind', kind: 'surprise', path: 'x' },
+      { id: 'absent', kind: 'hook-config', path: 'absent.json', shape: 'nested-hooks', identify: () => true },
+      { id: 'mine', kind: 'hook-config', path: 'hooks.json', shape: 'nested-hooks', identify: isMine },
+      { id: 'theirs', kind: 'hook-config', path: 'hooks.json', shape: 'nested-hooks', identify: (command) => typeof command === 'string' && command.includes('--harness x') },
+    ];
+    const findings = checkInstall(dir, { surfaces, pathExists: () => true });
+    for (const result of findings) assert(vocabulary.has(result.status), `unexpected checkInstall status ${JSON.stringify(result.status)}`);
+    assert(findings.map((result) => result.status).join(',') === 'broken,missing,stale,ok', `expected the full vocabulary in order, got ${findings.map((result) => result.status).join(',')}`);
+  });
 });
 
 console.log(failures === 0 ? `\nself-test: all checks passed` : `\nself-test: ${failures} check(s) FAILED`);
