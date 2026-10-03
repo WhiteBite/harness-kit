@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /** harness-kit self-test: registry validation, sabotage fixtures, forward compatibility, and a two-owner coexistence sweep over every mergeable registry row. */
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { loadRegistry, validateRegistry } from '../src/registry.mjs';
 import { mergeHooks } from '../src/merge.mjs';
 import { writeMarkerBlock } from '../src/marker.mjs';
@@ -224,6 +224,21 @@ check('sabotage: checkInstall statuses stay inside the drift vocabulary', () => 
     for (const result of findings) assert(vocabulary.has(result.status), `unexpected checkInstall status ${JSON.stringify(result.status)}`);
     assert(findings.map((result) => result.status).join(',') === 'broken,missing,stale,ok', `expected the full vocabulary in order, got ${findings.map((result) => result.status).join(',')}`);
   });
+});
+
+check('repo hygiene: no drive-letter paths in src, registry, types, scripts, docs', () => {
+  // test/ is out of the scan: its fixtures legitimately carry Windows paths for parser coverage
+  const DRIVE_PATH = /[A-Za-z]:\\/;
+  const offenders = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir).sort()) {
+      const full = join(dir, entry);
+      if (statSync(full).isDirectory()) walk(full);
+      else if (DRIVE_PATH.test(readFileSync(full, 'utf8'))) offenders.push(relative('.', full).split('\\').join('/'));
+    }
+  };
+  for (const root of ['src', 'registry', 'types', 'scripts', 'docs']) walk(root);
+  assert(offenders.length === 0, `machine-local paths leaked: ${offenders.join(', ')}`);
 });
 
 console.log(failures === 0 ? `\nself-test: all checks passed` : `\nself-test: ${failures} check(s) FAILED`);

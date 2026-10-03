@@ -9,7 +9,7 @@ const strict = (command) => typeof command === 'string' && command.includes('src
 test('extractCliPath: quoted .ts wins, bare .ts falls back, non-ts and non-strings are null', () => {
   assert.equal(extractCliPath(DEJAVU), '/tools/dejavu-gates/src/cli.ts');
   assert.equal(extractCliPath('bun /tools/x/src/cli.ts pre'), '/tools/x/src/cli.ts');
-  assert.equal(extractCliPath('bun "C:\\tools\\dejavu-gates\\src\\cli.ts" pre'), 'C:\\tools\\dejavu-gates\\src\\cli.ts');
+  assert.equal(extractCliPath('bun "C:\\tools\\cli.ts" pre'), 'C:\\tools\\cli.ts');
   assert.equal(extractCliPath('bun "/a/foo.mjs" /b/cli.ts pre'), '/b/cli.ts');
   assert.equal(extractCliPath('node /foreign/audit.js'), null);
   assert.equal(extractCliPath(42), null);

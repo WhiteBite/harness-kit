@@ -70,7 +70,7 @@ test('readJsonConfig: absent is null, malformed aborts with ConfigParseError, no
 });
 
 test('renderTemplate substitutes {{VARS}} with full JSON-string escaping', () => {
-  const windowsCommand = 'bun "C:\\tools\\dejavu-gates\\src\\cli.ts" pre --harness codex';
+  const windowsCommand = 'bun "C:\\tools\\cli.ts" pre --harness codex';
   const rendered = renderTemplate('{"hooks":{"PreToolUse":[{"command":"{{CLI}}"}]}}', { CLI: windowsCommand });
   const parsed = JSON.parse(rendered);
   assert.equal(parsed.hooks.PreToolUse[0].command, windowsCommand, 'backslashes and quotes must survive the round trip');
