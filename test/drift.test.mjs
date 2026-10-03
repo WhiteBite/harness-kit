@@ -81,3 +81,29 @@ test('checkDrift: the tolerant predicate survives a corrupted path where the str
     detail: null,
   });
 });
+
+const SLOP_COMMAND = 'node "/tools/stop-ai-slop/scan.mjs" --pre-tool';
+const PRE_TOOL = /node\s+"([^"]+)"\s+--pre-tool/;
+const isSlop = (command) => typeof command === 'string' && command.includes('--pre-tool');
+
+test('extractCliPath: a caller-supplied matcher extracts non-ts invocations, the default stays ts-only', () => {
+  assert.equal(extractCliPath('node "/tools/stop-ai-slop/scan.mjs" --staged', /node\s+"([^"]+)"\s+--staged/), '/tools/stop-ai-slop/scan.mjs');
+  assert.equal(extractCliPath('node "/a/scan.mjs" scan', /node\s+"([^"]+)"\s+--staged/), null);
+  assert.equal(extractCliPath('run /a/scan.mjs --staged', /\S+\.mjs/), '/a/scan.mjs');
+  assert.equal(extractCliPath(42, PRE_TOOL), null);
+  assert.equal(extractCliPath(null, PRE_TOOL), null);
+  assert.equal(extractCliPath(SLOP_COMMAND), null, 'the default branch must keep matching ts only');
+});
+
+test('checkDrift: an extract override classifies non-ts commands as stale or ok', () => {
+  const config = { hooks: { PreToolUse: [{ hooks: [{ command: SLOP_COMMAND }] }] } };
+  const extract = (command) => extractCliPath(command, PRE_TOOL);
+  assert.deepEqual(
+    checkDrift({ config }, { shape: 'nested-hooks', identify: isSlop, pathExists: () => false, extract }),
+    { status: 'stale', detail: '/tools/stop-ai-slop/scan.mjs' },
+  );
+  assert.deepEqual(
+    checkDrift({ config }, { shape: 'nested-hooks', identify: isSlop, pathExists: () => true, extract }),
+    { status: 'ok', detail: null },
+  );
+});

@@ -120,9 +120,10 @@ export interface CheckDriftOpts {
   identify: (command: unknown) => boolean;
   pathExists: (cliPath: string) => boolean;
   isMine?: (command: unknown) => boolean;
+  extract?: (command: unknown) => string | null;
 }
 
-export function extractCliPath(command: unknown): string | null;
+export function extractCliPath(command: unknown, matcher?: RegExp): string | null;
 export function collectCommands(config: Record<string, unknown>, options: { shape: MergeShape }): string[];
 export function checkDrift(input: CheckDriftInput, options: CheckDriftOpts): DriftResult;
 
