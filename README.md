@@ -26,6 +26,7 @@ Zero runtime dependencies, Node >= 18, plain ESM (Bun-compatible). Not published
 - Write JSON configs atomically with validated backups, symlink refusal and Windows rename retries.
 - Install agent skills into harness skill directories with safe state classification (never clobbers manual content).
 - Render hook-config templates with full JSON escaping so Windows paths survive the round trip.
+- Aggregate install health across surfaces with structured findings — config drift, marker-block rot, the git `core.hooksPath` — while formatting and exit policy stay consumer-side.
 
 ## Examples
 
@@ -51,6 +52,28 @@ const [record] = ownedLocators(repoRoot, 'my-tool', '.codex/hooks.json');
 const intact = entryMatchesHash(currentConfig, record); // false after any out-of-band edit
 ```
 
+### Doctor an install across surfaces
+
+```js
+import { checkInstall, resolveHooksDir, extractCliPath } from './vendor/harness-kit/src/index.mjs';
+
+const hooksDir = resolveHooksDir(repoRoot); // null when .git is absent
+const findings = checkInstall(repoRoot, {
+  surfaces: [
+    { id: 'codex', kind: 'hook-config', path: '.codex/hooks.json', shape: 'nested-hooks', identify: isMine },
+    hooksDir === null ? null : {
+      id: 'git',
+      kind: 'marker-block',
+      path: `${hooksDir}/pre-commit`,
+      variant: 'shell-block',
+      markerId: 'slop-gate',
+      extract: (text) => extractCliPath(text, /node\s+"([^"]+)"\s+--staged/),
+    },
+  ].filter(Boolean),
+});
+// [{ surface: 'codex', status: 'ok', detail: null }, { surface: 'git', status: 'stale', detail: '/gone/scan.mjs' }]
+```
+
 ## Why choose this
 
 - **Registry as data.** `registry/harnesses.json` is a language-neutral contract with a JSON Schema: non-JS tools read the same facts JS tools do.
@@ -61,7 +84,7 @@ const intact = entryMatchesHash(currentConfig, record); // false after any out-o
 
 ## Status
 
-Phase 2: canonical registry (14 harness rows reconciled from three independent implementations), merge/ownership/atomic/template/symlink/marker-block/drift primitives, test suite, self-test and hash manifest. Adopted by the family tools — repo-aeo (skill symlinks), stop-ai-slop (hooks, rules, pre-commit) and dejavu-gates (merges, templates, drift) each vendor the kit behind a sha256 sync-check and a golden byte-diff gate; see [docs/consumption.md](docs/consumption.md) and [docs/coexistence.md](docs/coexistence.md).
+Phase 3: doctor aggregation — `checkInstall` findings over hook-config and marker-block surfaces, marker read-side, the git `core.hooksPath` resolver, caller-supplied CLI-path extraction — atop Phase 2's canonical registry (14 harness rows reconciled from three independent implementations), merge/ownership/atomic/template/symlink/marker-block/drift primitives, test suite, self-test and hash manifest. Adopted by the family tools — repo-aeo (skill symlinks), stop-ai-slop (hooks, rules, pre-commit) and dejavu-gates (merges, templates, drift) each vendor the kit behind a sha256 sync-check and a golden byte-diff gate; see [docs/consumption.md](docs/consumption.md) and [docs/coexistence.md](docs/coexistence.md).
 
 ## License
 

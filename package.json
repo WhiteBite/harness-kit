@@ -1,6 +1,6 @@
 {
   "name": "@whitebite/harness-kit",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Canonical registry and zero-dependency primitives for wiring AI coding harnesses (Claude Code, Codex, OpenCode 1.x/2.x, Gemini, Qwen, Cursor, Windsurf, Kiro, Devin, Copilot, Crush, Cline, Aider): config paths, hook dialects, owner-scoped merges, skill symlinks, marker blocks.",
   "type": "module",
   "license": "MIT",
