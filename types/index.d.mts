@@ -98,6 +98,14 @@ export type WriteMarkerBlockOpts = ShellBlockOpts | HtmlBlockOpts | FirstLineMar
 /** `block` is the full caller-assembled text for shell/html/first-line; mdc-frontmatter builds bytes from fields + body and ignores it. */
 export function writeMarkerBlock(path: string, block: string, opts: WriteMarkerBlockOpts): MarkerBlockResult;
 
+export interface MarkerReadResult {
+  present: boolean;
+  text: string | null;
+}
+
+/** v1 reads shell blocks only; `text` spans the markers so callers extract inside the block. */
+export function readMarkerBlock(content: string, opts: { variant: 'shell-block'; id: string }): MarkerReadResult;
+
 export type DriftStatus = 'broken' | 'missing' | 'stale' | 'ok';
 export interface DriftResult {
   status: DriftStatus;

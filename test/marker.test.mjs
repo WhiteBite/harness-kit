@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { writeMarkerBlock } from '../src/marker.mjs';
+import { writeMarkerBlock, readMarkerBlock } from '../src/marker.mjs';
 
 function temp() {
   return mkdtempSync(join(tmpdir(), 'hk-marker-'));
@@ -194,4 +194,36 @@ test('validation: each variant rejects a missing discriminator', () => {
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('readMarkerBlock: returns the matched shell block text, absent blocks report not present', () => {
+  const dir = temp();
+  try {
+    const path = join(dir, 'pre-commit');
+    writeMarkerBlock(path, SHELL_BLOCK, { variant: 'shell-block', id: 'slop-gate' });
+    const content = readFileSync(path, 'utf8');
+    const found = readMarkerBlock(content, { variant: 'shell-block', id: 'slop-gate' });
+    assert.equal(found.present, true);
+    assert.equal(found.text, SHELL_BLOCK);
+
+    const foreign = readMarkerBlock('#!/bin/sh\necho foreign\n', { variant: 'shell-block', id: 'slop-gate' });
+    assert.deepEqual(foreign, { present: false, text: null });
+
+    const other = readMarkerBlock(SHELL_BLOCK, { variant: 'shell-block', id: 'other-gate' });
+    assert.equal(other.present, false, 'a foreign id must not claim another id block');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('readMarkerBlock: a block between foreign lines is still matched whole', () => {
+  const content = `#!/bin/sh\necho before\n${SHELL_BLOCK}echo after\n`;
+  const found = readMarkerBlock(content, { variant: 'shell-block', id: 'slop-gate' });
+  assert.equal(found.present, true);
+  assert.equal(found.text, SHELL_BLOCK);
+});
+
+test('readMarkerBlock: rejects a missing id and an unsupported variant', () => {
+  assert.throws(() => readMarkerBlock(SHELL_BLOCK, { variant: 'shell-block' }), /id/);
+  assert.throws(() => readMarkerBlock(SHELL_BLOCK, { variant: 'html-block', id: 'x' }), /variant/);
 });
