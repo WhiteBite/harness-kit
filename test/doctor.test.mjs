@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { checkInstall, resolveHooksDir } from '../src/doctor.mjs';
 import { extractCliPath } from '../src/drift.mjs';
@@ -153,6 +153,25 @@ test('resolveHooksDir: resolves a real git config core.hooksPath', () => {
     execFileSync('git', ['config', 'core.hooksPath', '.githooks'], { cwd: dir });
     assert.equal(resolveHooksDir(dir), join(dir, '.githooks'));
     assert.equal(resolveHooksDir(dir, { exec: () => '' }), join(dir, '.git', 'hooks'));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('resolveHooksDir: a linked worktree resolves hooks through rev-parse, not the .git file', () => {
+  const dir = temp();
+  try {
+    const main = join(dir, 'main');
+    mkdirSync(main, { recursive: true });
+    const git = (args, cwd) => execFileSync('git', ['-c', 'user.email=t@t', '-c', 'user.name=t', ...args], { cwd, encoding: 'utf8' });
+    git(['init', '--quiet', '-b', 'main'], main);
+    writeFileSync(join(main, 'a.txt'), 'a');
+    git(['add', 'a.txt'], main);
+    git(['commit', '--quiet', '-m', 'init'], main);
+    const wt = join(dir, 'wt');
+    git(['worktree', 'add', '--quiet', wt], main);
+    const gitPath = git(['rev-parse', '--git-path', 'hooks'], wt).trim();
+    assert.equal(resolveHooksDir(wt), resolve(wt, gitPath));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

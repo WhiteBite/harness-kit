@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, readFileSync, rmSync, symlinkSync, statSync } from 'node:fs';
+import { existsSync, mkdtempSync, writeFileSync, readFileSync, rmSync, symlinkSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { writeJsonAtomic, readJsonConfig, ConfigParseError } from '../src/atomic.mjs';
@@ -91,4 +91,31 @@ test('renderPath throws on any unresolved placeholder instead of writing a liter
   assert.throws(() => renderPath('.kiro/hooks/{tool}.json', {}), /\{tool\}/);
   assert.throws(() => renderPath('.cursor/rules/{id}.mdc', { tool: 'x' }), /\{id\}/);
   assert.throws(() => renderPath('.devin/rules/{id}.md', { id: '' }), /\{id\}/);
+});
+
+test('writeJsonAtomic skips a byte-identical rewrite: no mtime change and no backup', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'hk-atomic-'));
+  try {
+    const path = join(dir, 'config.json');
+    writeJsonAtomic(path, { a: 1 });
+    const before = statSync(path).mtimeMs;
+    writeJsonAtomic(path, { a: 1 });
+    assert.equal(statSync(path).mtimeMs, before);
+    assert.equal(existsSync(join(dir, 'config.json.bak')), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('writeJsonAtomic with backup:false leaves no .bak on a real change', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'hk-atomic-'));
+  try {
+    const path = join(dir, 'config.json');
+    writeFileSync(path, JSON.stringify({ version: 1 }, null, 2) + '\n');
+    writeJsonAtomic(path, { version: 2 }, { backup: false });
+    assert.deepEqual(JSON.parse(readFileSync(path, 'utf8')), { version: 2 });
+    assert.equal(existsSync(join(dir, 'config.json.bak')), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
