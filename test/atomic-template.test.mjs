@@ -4,7 +4,7 @@ import { mkdtempSync, writeFileSync, readFileSync, rmSync, symlinkSync, statSync
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { writeJsonAtomic, readJsonConfig, ConfigParseError } from '../src/atomic.mjs';
-import { renderTemplate } from '../src/template.mjs';
+import { renderTemplate, renderPath } from '../src/template.mjs';
 
 test('writeJsonAtomic creates an LF file with two-space indent and trailing newline', () => {
   const dir = mkdtempSync(join(tmpdir(), 'hk-atomic-'));
@@ -79,4 +79,16 @@ test('renderTemplate substitutes {{VARS}} with full JSON-string escaping', () =>
 test('renderTemplate leaves unknown placeholders untouched and is idempotent on plain text', () => {
   assert.equal(renderTemplate('no vars here', { CLI: 'x' }), 'no vars here');
   assert.equal(renderTemplate('{{UNKNOWN}}', {}), '{{UNKNOWN}}');
+});
+
+test('renderPath expands {placeholders} and passes through paths without any', () => {
+  assert.equal(renderPath('.kiro/hooks/{tool}.json', { tool: 'dejavu-gates' }), '.kiro/hooks/dejavu-gates.json');
+  assert.equal(renderPath('.github/hooks/{tool}.json', { tool: 'stop-ai-slop' }), '.github/hooks/stop-ai-slop.json');
+  assert.equal(renderPath('.claude/settings.json', {}), '.claude/settings.json');
+});
+
+test('renderPath throws on any unresolved placeholder instead of writing a literal brace path', () => {
+  assert.throws(() => renderPath('.kiro/hooks/{tool}.json', {}), /\{tool\}/);
+  assert.throws(() => renderPath('.cursor/rules/{id}.mdc', { tool: 'x' }), /\{id\}/);
+  assert.throws(() => renderPath('.devin/rules/{id}.md', { id: '' }), /\{id\}/);
 });
