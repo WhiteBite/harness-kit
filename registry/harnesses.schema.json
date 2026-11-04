@@ -54,6 +54,29 @@
           ]
         },
         "plugin": { "type": "object" },
+        "mcp": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "required": ["config", "format", "container"],
+              "properties": {
+                "status": { "enum": ["stable", "preview", "experimental"] },
+                "config": { "type": "object" },
+                "format": { "enum": ["json", "jsonc", "toml"] },
+                "container": { "type": "string" },
+                "urlField": { "type": "string" },
+                "typeField": { "type": "string" },
+                "typeValue": { "type": "string" },
+                "tokenEnvSyntax": { "type": ["string", "null"] },
+                "authField": { "type": "string" },
+                "write": { "enum": ["merge", "print-only"] },
+                "source": { "type": "string" },
+                "note": { "type": "string" }
+              }
+            }
+          ]
+        },
         "skills": {
           "type": "object",
           "properties": {

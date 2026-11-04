@@ -4,6 +4,12 @@ Format: keep-a-changelog. `registryVersion` follows semver:
 MAJOR removes/renames keys or changes meaning, MINOR adds harnesses or fields, PATCH is notes and typos.
 Keys are never deleted - they are deprecated in place (forward compatibility for vendored consumers).
 
+## 0.2.0
+
+- New `mcp` block per harness: MCP client config as a keyed map (config paths, format, container key, url field, type field/value, token-env syntax). All MCP blocks are `status: "experimental"` with a `source` (remote-devbox-mcp/home/rdm/prompt.py) and a `note` naming what to verify - none are verified against a live host yet.
+- Added 8 `mcp` blocks to existing rows (claude, codex, opencode, gemini, cursor, windsurf, cline, kiro) and 4 MCP-only rows (vscode, roo, zed, factory), all `experimental`.
+- Schema: tolerant `mcp` object; `format` is json|jsonc|toml; non-JSON formats are print-only by convention.
+
 ## 0.1.0
 
 - Initial reconciled registry: 14 harness entries (claude, codex, opencode, gemini, qwen, cursor, windsurf, aider, cline, kiro, devin, copilot, crush, git) extracted from three independent implementations (dejavu-gates install-config/templates, stop-ai-slop install.mjs/pretool, repo-aeo skill.js) and reconciled to single canonical facts.

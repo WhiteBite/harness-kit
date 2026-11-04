@@ -113,6 +113,32 @@ check('forward compatibility: unknown keys and new harnesses are tolerated', () 
   assert(problems.length === 0, problems.join('; '));
 });
 
+check('mcp: every mcp row declares config, format and container', () => {
+  let swept = 0;
+  for (const [id, entry] of Object.entries(registry.harnesses)) {
+    const mcp = entry.mcp;
+    if (!mcp) continue;
+    assert(mcp.config && typeof mcp.config === 'object', `${id}: mcp.config required`);
+    assert(['json', 'jsonc', 'toml'].includes(mcp.format), `${id}: mcp.format invalid`);
+    assert(typeof mcp.container === 'string' && mcp.container !== '', `${id}: mcp.container required`);
+    if (mcp.format !== 'json') assert(mcp.write === 'print-only', `${id}: non-JSON mcp must be print-only`);
+    swept += 1;
+  }
+  assert(swept >= 12, `expected at least 12 mcp rows, swept ${swept}`);
+});
+
+check('sabotage: invalid mcp format is caught', () => {
+  const bad = clone(registry);
+  bad.harnesses.claude.mcp.format = 'yaml';
+  assert(validateRegistry(bad).length > 0, 'invalid mcp.format must be rejected');
+});
+
+check('sabotage: mcp without container is caught', () => {
+  const bad = clone(registry);
+  delete bad.harnesses.cursor.mcp.container;
+  assert(validateRegistry(bad).length > 0, 'mcp.container must be required');
+});
+
 check('coexistence sweep: two owners merge, reinstall byte-identical, uninstall strips only own', () => {
   let swept = 0;
   for (const [id, entry] of Object.entries(registry.harnesses)) {

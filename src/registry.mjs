@@ -10,6 +10,7 @@ const STATUSES = ['stable', 'preview', 'experimental'];
 const SHAPES = ['nested-hooks', 'root-events', 'versioned-flat', 'versioned-typed', 'flat-matcher', 'hooks-array'];
 const WRITES = ['merge', 'overwrite', 'marker-block', 'print-only'];
 const RULE_FORMATS = ['plain', 'mdc', 'marker-block'];
+const MCP_FORMATS = ['json', 'jsonc', 'toml'];
 
 export function loadRegistry(path = REGISTRY_PATH) {
   return JSON.parse(readFileSync(path, 'utf8'));
@@ -49,6 +50,16 @@ export function validateRegistry(registry) {
         if (hooks.shape !== undefined && !SHAPES.includes(hooks.shape)) {
           problems.push(`${id}: unknown hooks.shape ${JSON.stringify(hooks.shape)}`);
         }
+      }
+    }
+    if (entry.mcp !== undefined && entry.mcp !== null) {
+      if (typeof entry.mcp !== 'object' || Array.isArray(entry.mcp)) {
+        problems.push(`${id}: mcp must be an object or null`);
+      } else {
+        const mcp = entry.mcp;
+        if (!mcp.config || typeof mcp.config !== 'object' || Array.isArray(mcp.config)) problems.push(`${id}: mcp.config is required`);
+        if (!MCP_FORMATS.includes(mcp.format)) problems.push(`${id}: mcp.format must be one of ${MCP_FORMATS.join(', ')}`);
+        if (typeof mcp.container !== 'string' || mcp.container === '') problems.push(`${id}: mcp.container is required`);
       }
     }
     if (entry.rules !== undefined && !Array.isArray(entry.rules)) problems.push(`${id}: rules must be an array`);
