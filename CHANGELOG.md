@@ -2,6 +2,11 @@
 
 Keep-a-changelog format. The package `version` is independent of the registry's `registryVersion` (see `registry/CHANGELOG.md`).
 
+## 0.8.0
+
+- registry 0.3.0: add `verified: { against, at }` provenance. `status: "stable"` rows must carry it; `validateRegistry` and a self-test gate reject a stable row without it or with a malformed date.
+- Types gain `Verified`, `RegistryMcp`, and `harness.verified` / `harness.mcp`.
+
 ## 0.7.1
 
 - Publish `manifest.json`, `CHANGELOG.md` and `docs/` in the npm tarball: `harness-kit vendor/check` and the documented sync-check now work for npm consumers (previously `manifest.json` was omitted).

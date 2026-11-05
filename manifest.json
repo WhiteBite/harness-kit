@@ -1,7 +1,7 @@
 {
   "kit": "@whitebite/harness-kit",
-  "kitVersion": "0.7.1",
-  "registryVersion": "0.2.0",
+  "kitVersion": "0.8.0",
+  "registryVersion": "0.3.0",
   "files": {
     "src/atomic.mjs": "b1036ba718d1dfe85bf8141114366139eb3d6f075956ebc02dc05f436e7c9ef0",
     "src/doctor.mjs": "d592e256174f81a6e37917c5af7909814cfc52000fb435412ffe72e5e61c4c91",
@@ -10,12 +10,12 @@
     "src/marker.mjs": "57d8e605c1b7ff3f98f6bc2f2710b40d2f8ffeb853417d66ba3cb8298839a435",
     "src/merge.mjs": "c0c666167c22d22091de211642615d6844d6a99202888a6e24582e124ad93ba5",
     "src/ownership.mjs": "8e768c012d082d56e46ba0d0f8b2a4c3a4520983f731d8e9c9dbd6c919f59019",
-    "src/registry.mjs": "690e75a11dfa025f7c0ecee3a4a884f4b1d722e25b4cd40a734c55b1ac8f2c80",
+    "src/registry.mjs": "1912ddb4cf7a1280c3ef6a9c65f52d9dfdd6372258d41bdad2ef98d21ce1a5eb",
     "src/symlink.mjs": "dd225abf327d72c2f6cdd069fdc8403b2d3852203ea0aa3f511eecc07ba866c1",
     "src/template.mjs": "31afd7f737bc9eb84e874817788ff2853a6fe468bc8f2c5c3fd97de6ba828374",
-    "registry/CHANGELOG.md": "2bf22c93e6020dc6e8c71722e9081d31116982cea5d2da64a46e4196f6e0ca60",
-    "registry/harnesses.json": "69faf05db9a1d97876d2a963ba6e2b4cdc0414b6104eeac069e5294f1cdafcd4",
-    "registry/harnesses.schema.json": "ad2a9cd47f372fd0d173bf28c544467ed2591aa5063e873250771dc37f386072",
-    "types/index.d.mts": "8938fbd0ce9b4e952127ae84c50ca4675326c1b65e1c5b06fa6021b5fdc8ca72"
+    "registry/CHANGELOG.md": "5b5194eb0d6a214aac0fdc0f9bff3cbbdf37a522de85bc3d7bccf062a872cddc",
+    "registry/harnesses.json": "cbcc1616688dc8f0711ed4ff5c60b3584272dda12280887307f8e1f1ab45a4ab",
+    "registry/harnesses.schema.json": "6952906533babe4d2323ad5924f82ca18e4aa0c8304133ff263aa0cdf88170dc",
+    "types/index.d.mts": "756a1e2027ea4c9f75745ca603d5caf09091898bd6a11b1f22ef044a78fe1a1d"
   }
 }

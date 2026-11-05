@@ -33,7 +33,7 @@ test('vendor writes a kit copy that check verifies; tampering fails check', () =
     run(['vendor', target]);
     assert.match(run(['check', target]), /files match manifest/);
     const victim = join(target, 'registry', 'harnesses.json');
-    writeFileSync(victim, readFileSync(victim, 'utf8').replace('"registryVersion": "0.2.0"', '"registryVersion": "9.9.9"'));
+    writeFileSync(victim, `${readFileSync(victim, 'utf8')}\n`);
     assert.throws(() => run(['check', target]), /drifted/);
   });
 });

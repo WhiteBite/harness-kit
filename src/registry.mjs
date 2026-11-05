@@ -11,6 +11,11 @@ const SHAPES = ['nested-hooks', 'root-events', 'versioned-flat', 'versioned-type
 const WRITES = ['merge', 'overwrite', 'marker-block', 'print-only'];
 const RULE_FORMATS = ['plain', 'mdc', 'marker-block'];
 const MCP_FORMATS = ['json', 'jsonc', 'toml'];
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+function isProvenance(value) {
+  return Boolean(value) && typeof value === 'object' && typeof value.against === 'string' && value.against !== '' && DATE.test(value.at);
+}
 
 export function loadRegistry(path = REGISTRY_PATH) {
   return JSON.parse(readFileSync(path, 'utf8'));
@@ -35,6 +40,12 @@ export function validateRegistry(registry) {
     }
     if (typeof entry.name !== 'string' || entry.name === '') problems.push(`${id}: name is required`);
     if (!STATUSES.includes(entry.status)) problems.push(`${id}: status must be one of ${STATUSES.join(', ')}`);
+    if (entry.verified !== undefined && !isProvenance(entry.verified)) {
+      problems.push(`${id}: verified must be { against, at: YYYY-MM-DD }`);
+    }
+    if (entry.status === 'stable' && entry.verified === undefined) {
+      problems.push(`${id}: a stable row requires verified provenance`);
+    }
     if (entry.hooks !== undefined && entry.hooks !== null) {
       if (typeof entry.hooks !== 'object' || Array.isArray(entry.hooks)) {
         problems.push(`${id}: hooks must be an object or null`);

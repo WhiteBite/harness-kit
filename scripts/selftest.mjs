@@ -139,6 +139,28 @@ check('sabotage: mcp without container is caught', () => {
   assert(validateRegistry(bad).length > 0, 'mcp.container must be required');
 });
 
+check('provenance: every stable row declares verified{against, at}', () => {
+  let swept = 0;
+  for (const [id, entry] of Object.entries(registry.harnesses)) {
+    if (entry.status !== 'stable') continue;
+    assert(entry.verified && entry.verified.against && /^\d{4}-\d{2}-\d{2}$/.test(entry.verified.at), `${id}: stable row must carry verified provenance`);
+    swept += 1;
+  }
+  assert(swept >= 8, `expected several stable rows, swept ${swept}`);
+});
+
+check('sabotage: a stable row without verified is caught', () => {
+  const bad = clone(registry);
+  delete bad.harnesses.claude.verified;
+  assert(validateRegistry(bad).length > 0, 'a stable row without verified must be rejected');
+});
+
+check('sabotage: a malformed verified date is caught', () => {
+  const bad = clone(registry);
+  bad.harnesses.codex.verified.at = '03-10-2026';
+  assert(validateRegistry(bad).length > 0, 'a non-ISO verified.at must be rejected');
+});
+
 check('coexistence sweep: two owners merge, reinstall byte-identical, uninstall strips only own', () => {
   let swept = 0;
   for (const [id, entry] of Object.entries(registry.harnesses)) {

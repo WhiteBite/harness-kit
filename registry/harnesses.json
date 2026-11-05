@@ -1,7 +1,7 @@
 {
   "$schema": "./harnesses.schema.json",
   "schemaVersion": 1,
-  "registryVersion": "0.2.0",
+  "registryVersion": "0.3.0",
   "conventions": {
     "ownership": {
       "sidecar": ".harness-kit/ownership.json",
@@ -23,6 +23,7 @@
     "claude": {
       "name": "Claude Code",
       "status": "stable",
+      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
       "hooks": {
         "config": { "project": ".claude/settings.json", "user": ".claude/settings.json" },
         "write": "merge",
@@ -56,6 +57,7 @@
     "codex": {
       "name": "Codex CLI",
       "status": "stable",
+      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
       "hooks": {
         "config": { "project": ".codex/hooks.json", "user": ".codex/hooks.json" },
         "write": "merge",
@@ -83,6 +85,7 @@
     "opencode": {
       "name": "OpenCode",
       "status": "stable",
+      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
       "hooks": null,
       "plugin": {
         "stubs": { "user": ".config/opencode/plugins/{name}.ts", "project": ".opencode/plugin/{name}.ts" },
@@ -109,6 +112,7 @@
     "gemini": {
       "name": "Gemini CLI",
       "status": "stable",
+      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
       "hooks": {
         "config": { "project": ".gemini/settings.json", "user": ".gemini/settings.json" },
         "write": "merge",
@@ -148,6 +152,7 @@
     "cursor": {
       "name": "Cursor",
       "status": "stable",
+      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
       "hooks": {
         "config": { "project": ".cursor/hooks.json", "user": ".cursor/hooks.json" },
         "write": "merge",
@@ -175,6 +180,7 @@
     "windsurf": {
       "name": "Windsurf",
       "status": "stable",
+      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
       "hooks": null,
       "rules": [{ "path": ".windsurfrules", "format": "plain", "ownership": "first-line-marker" }],
       "mcp": {
@@ -192,12 +198,14 @@
     "aider": {
       "name": "Aider",
       "status": "stable",
+      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
       "hooks": null,
       "rules": [{ "path": "CONVENTIONS.md", "format": "plain", "ownership": "first-line-marker", "note": "pair with aider --read CONVENTIONS.md" }]
     },
     "cline": {
       "name": "Cline",
       "status": "stable",
+      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
       "hooks": null,
       "plugin": {
         "inProcess": "long-lived sandbox subprocess host (see dejavu src/cline-plugin.ts); declared via package.json \"cline.plugins\"",
@@ -223,6 +231,7 @@
     "kiro": {
       "name": "Kiro",
       "status": "stable",
+      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
       "hooks": {
         "config": { "project": ".kiro/hooks/{tool}.json" },
         "write": "overwrite",
@@ -249,6 +258,7 @@
     "devin": {
       "name": "Devin CLI",
       "status": "stable",
+      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
       "hooks": {
         "config": { "project": ".devin/hooks.v1.json" },
         "write": "merge",
@@ -358,6 +368,7 @@
     "git": {
       "name": "git (pre-commit enforcement surface)",
       "status": "stable",
+      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
       "hooks": {
         "config": { "project": ".git/hooks/pre-commit" },
         "resolveVia": "git config core.hooksPath",
