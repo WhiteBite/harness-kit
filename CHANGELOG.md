@@ -10,6 +10,7 @@ Security and robustness hardening:
 - `renderTemplate` is single-pass (a `{{...}}` inside a substituted value is no longer re-substituted).
 - Fixes: `checkInstall` no longer throws on a non-shell marker surface; `readOwnership`/`entryMatchesHash` tolerate malformed sidecar entries; `recordOwnership` keeps prior records for other locators of the same file; the first-line marker matches a CRLF file.
 - CLI: `vendor` requires the target to be a real harness-kit copy; `check` rejects manifest keys that escape the tree.
+- Hook shapes now have a single source of truth (`src/shapes.mjs`); the schema enum, `mergeHooks` and `collectCommands` derive from it, and an unknown shape fails loudly.
 
 ## 0.8.0
 

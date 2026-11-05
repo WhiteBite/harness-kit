@@ -1,5 +1,6 @@
 /** Drift classification for installed hook commands: broken config, missing hooks, or a rotted cli path. Returns facts only. */
 import { entryCommands } from './merge.mjs';
+import { shapeDescriptor } from './shapes.mjs';
 
 export function extractCliPath(command, matcher) {
   if (typeof command !== 'string') return null;
@@ -23,11 +24,12 @@ export function collectCommands(config, { shape } = {}) {
     }
   };
   if (!config || typeof config !== 'object') return commands;
-  if (shape === 'hooks-array') {
+  const { container } = shapeDescriptor(shape);
+  if (container === 'hooks-array') {
     walk(config.hooks);
     return commands;
   }
-  if (shape === 'root-events') {
+  if (container === 'root') {
     for (const entries of Object.values(config)) walk(entries);
     return commands;
   }

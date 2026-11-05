@@ -2,12 +2,13 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { SHAPE_NAMES } from './shapes.mjs';
 
 const KIT_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const REGISTRY_PATH = join(KIT_ROOT, 'registry', 'harnesses.json');
 
 const STATUSES = ['stable', 'preview', 'experimental'];
-const SHAPES = ['nested-hooks', 'root-events', 'versioned-flat', 'versioned-typed', 'flat-matcher', 'hooks-array'];
+const SHAPES = SHAPE_NAMES;
 const WRITES = ['merge', 'overwrite', 'marker-block', 'print-only'];
 const RULE_FORMATS = ['plain', 'mdc', 'marker-block'];
 const MCP_FORMATS = ['json', 'jsonc', 'toml'];
