@@ -1,6 +1,6 @@
 {
   "kit": "@whitebite/harness-kit",
-  "kitVersion": "0.6.0",
+  "kitVersion": "0.7.0",
   "registryVersion": "0.2.0",
   "files": {
     "src/atomic.mjs": "b1036ba718d1dfe85bf8141114366139eb3d6f075956ebc02dc05f436e7c9ef0",

@@ -40,3 +40,24 @@ Re-copy the four vendored items from the kit version being adopted, in one commi
 - Each consumer migrates behind its existing install test suite, plus a golden byte-diff gate: snapshot every config file the installer writes before the migration, run it after, require an empty diff.
 - Migrated hook entries must keep their legacy command substrings (`--pre-tool`, `src/cli.ts ... --harness <name>`) so a not-yet-migrated tool still recognizes its own entries.
 - Adoption order: repo-aeo (smallest installer) → stop-ai-slop → dejavu-gates (whose install-config is the kit's spiritual source, so its migration is mostly deletion).
+
+## 5. CLI
+
+The kit ships a zero-dep CLI so vendoring and the sync-check are one command:
+
+```bash
+npx @whitebite/harness-kit versions                    # kit + registry versions
+npx @whitebite/harness-kit vendor vendor/harness-kit   # copy the pinned kit, then verify
+npx @whitebite/harness-kit check vendor/harness-kit    # recompute manifest hashes, fail on drift
+```
+
+`vendor` refuses to overwrite a directory that is not a harness-kit copy (no `manifest.json`).
+
+## 6. Language-neutral consumption (any language)
+
+The registry and schema are plain JSON, so a non-JS consumer needs no npm or node - pin an immutable tag:
+
+- `https://raw.githubusercontent.com/WhiteBite/harness-kit/vX.Y.Z/registry/harnesses.json`
+- `https://raw.githubusercontent.com/WhiteBite/harness-kit/vX.Y.Z/registry/harnesses.schema.json`
+
+Verify the fetched file against the sha256 in `manifest.json` (`files["registry/harnesses.json"]`) before trusting it. Tags are immutable; `main` is not a pin.
