@@ -36,6 +36,9 @@ jobs:
       - name: Test suite
         run: npm test
 
+      - name: Release integrity check
+        run: node scripts/release-check.mjs
+
       - name: Exchange OIDC token for registry token
         run: |
           name=$(node -p "require('./package.json').name")

@@ -1,6 +1,6 @@
 # Migrations
 
-Per-consumer steps for breaking harness-kit changes. The package `version` and `registryVersion` are independent; a MAJOR `registryVersion` bump is where a fact a consumer acts on (path, write, shape, events, container) changed, even when it "fixes" a value.
+Per-consumer steps for breaking harness-kit changes. The package `version` and `registryVersion` are independent. A MAJOR `registryVersion` bump is a STRUCTURAL change (a key removed, renamed, or given a new meaning) that breaks consumer code; a fact VALUE change is MINOR and is surfaced by the lockfile/`diff`, not the version number.
 
 ## Registry 0.2.0 (kit 0.6.0)
 

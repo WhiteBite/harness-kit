@@ -1,7 +1,7 @@
 # Registry changelog
 
 Format: keep-a-changelog. `registryVersion` follows semver:
-MAJOR removes/renames keys or changes meaning, MINOR adds harnesses or fields, PATCH is notes and typos.
+MAJOR removes/renames keys or changes their meaning (a structural break that breaks consumer code), MINOR adds harnesses, fields or additive blocks and also covers fact VALUE changes (a moved path or corrected container - consumer code does not change, the lockfile/`diff` surfaces it), PATCH is notes and typos.
 Keys are never deleted - they are deprecated in place (forward compatibility for vendored consumers).
 
 ## 0.2.0

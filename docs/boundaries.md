@@ -24,4 +24,4 @@ harness-kit is the **install substrate**: it answers "how do I write byte X into
 
 ## Growth rule
 
-Grow only under a live consumer: one shape + a sabotage test + a MINOR `registryVersion` bump + `status: "experimental"` for unverified facts (see docs/dialects.md). New keys are additive; a change to a fact a consumer acts on (path, write, shape, events, container) is a MAJOR bump even when it "fixes" a value (see registry/CHANGELOG.md).
+Grow only under a live consumer: one shape + a sabotage test + a MINOR `registryVersion` bump + `status: "experimental"` for unverified facts (see docs/dialects.md). New keys are additive. MAJOR is reserved for STRUCTURAL breaks — a key removed, renamed, or given a new meaning, which breaks consumer code. A fact VALUE change (path, write, shape, events, container) is MINOR: consumer code does not change, and the lockfile/`diff` surfaces it (see registry/CHANGELOG.md).
