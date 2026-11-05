@@ -37,6 +37,10 @@ function cmdCheck(dir) {
   const manifest = readManifest(target);
   const problems = [];
   for (const [rel, expected] of Object.entries(manifest.files)) {
+    if (rel.split('/').includes('..') || rel.startsWith('/') || rel.startsWith('\\')) {
+      problems.push(`unsafe manifest path ${rel}`);
+      continue;
+    }
     const file = join(target, rel);
     if (!existsSync(file)) problems.push(`missing ${rel}`);
     else if (hashFile(file) !== expected) problems.push(`drifted ${rel}`);
@@ -53,8 +57,16 @@ function cmdCheck(dir) {
 
 function cmdVendor(dir) {
   const target = resolve(dir);
-  if (existsSync(target) && !existsSync(join(target, MANIFEST))) {
-    throw new Error(`refusing to overwrite ${target}: no ${MANIFEST} (not a harness-kit vendor dir)`);
+  if (existsSync(target)) {
+    let existing = null;
+    try {
+      existing = readManifest(target);
+    } catch {
+      existing = null;
+    }
+    if (!existing || existing.kit !== '@whitebite/harness-kit') {
+      throw new Error(`refusing to overwrite ${target}: not a harness-kit vendor dir`);
+    }
   }
   rmSync(target, { recursive: true, force: true });
   mkdirSync(target, { recursive: true });

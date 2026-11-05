@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, writeFileSync, readFileSync, rmSync, symlinkSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync, readFileSync, rmSync, symlinkSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { writeJsonAtomic, readJsonConfig, ConfigParseError } from '../src/atomic.mjs';
@@ -26,7 +26,7 @@ test('writeJsonAtomic backs up the previous valid content before replacing', () 
     const path = join(dir, 'config.json');
     writeFileSync(path, JSON.stringify({ version: 1, old: true }, null, 2) + '\n');
     writeJsonAtomic(path, { version: 1, old: false });
-    const backup = readFileSync(join(dir, 'config.json.bak'), 'utf8');
+    const backup = readFileSync(join(dir, 'config.json.harness-kit.bak'), 'utf8');
     assert.deepEqual(JSON.parse(backup), { version: 1, old: true });
     assert.deepEqual(JSON.parse(readFileSync(path, 'utf8')), { version: 1, old: false });
   } finally {
@@ -101,7 +101,7 @@ test('writeJsonAtomic skips a byte-identical rewrite: no mtime change and no bac
     const before = statSync(path).mtimeMs;
     writeJsonAtomic(path, { a: 1 });
     assert.equal(statSync(path).mtimeMs, before);
-    assert.equal(existsSync(join(dir, 'config.json.bak')), false);
+    assert.equal(existsSync(join(dir, 'config.json.harness-kit.bak')), false);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -114,7 +114,34 @@ test('writeJsonAtomic with backup:false leaves no .bak on a real change', () => 
     writeFileSync(path, JSON.stringify({ version: 1 }, null, 2) + '\n');
     writeJsonAtomic(path, { version: 2 }, { backup: false });
     assert.deepEqual(JSON.parse(readFileSync(path, 'utf8')), { version: 2 });
-    assert.equal(existsSync(join(dir, 'config.json.bak')), false);
+    assert.equal(existsSync(join(dir, 'config.json.harness-kit.bak')), false);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('renderPath rejects a traversal or separator value', () => {
+  assert.throws(() => renderPath('.kiro/hooks/{tool}.json', { tool: '../evil' }), /unsafe/);
+  assert.throws(() => renderPath('.kiro/hooks/{tool}.json', { tool: 'a/b' }), /unsafe/);
+  assert.throws(() => renderPath('.kiro/hooks/{tool}.json', { tool: '..' }), /unsafe/);
+});
+
+test('renderTemplate does not re-substitute inside a value', () => {
+  assert.equal(renderTemplate('{{A}}-{{B}}', { A: '{{B}}', B: 'x' }), '{{B}}-x');
+});
+
+test('writeJsonAtomic refuses a symlinked parent directory', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'hk-atomic-'));
+  try {
+    const realDir = join(dir, 'real');
+    mkdirSync(realDir);
+    const link = join(dir, 'link');
+    try {
+      symlinkSync(realDir, link, process.platform === 'win32' ? 'junction' : 'dir');
+    } catch {
+      return;
+    }
+    assert.throws(() => writeJsonAtomic(join(link, 'config.json'), { a: 1 }), /symlink/i);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

@@ -48,7 +48,7 @@ export function checkDrift(input, opts) {
   for (const command of matched) {
     const cliPath = extract(command);
     if (cliPath === null) return { status: 'stale', detail: null };
-    if (pathExists(cliPath) === false) return { status: 'stale', detail: cliPath };
+    if (!pathExists(cliPath)) return { status: 'stale', detail: cliPath };
   }
   return { status: 'ok', detail: null };
 }
