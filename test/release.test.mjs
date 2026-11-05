@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { computeManifest } from '../src/manifest.mjs';
+import { surfaceProblems } from '../scripts/version.mjs';
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 
@@ -14,14 +15,8 @@ test('manifest.json matches the current tree (run npm run manifest after changin
   assert.deepEqual(manifest.files, computeManifest(ROOT), 'manifest.json is stale; run `npm run manifest`');
 });
 
-test('every version surface agrees', () => {
-  const citation = readFileSync(join(ROOT, 'CITATION.cff'), 'utf8').match(/^version:\s*"?([^"\n]+)"?/m)[1].trim();
-  const jsonld = JSON.parse(readFileSync(join(ROOT, 'docs', 'jsonld.jsonld'), 'utf8')).softwareVersion;
-  const registry = JSON.parse(readFileSync(join(ROOT, 'registry', 'harnesses.json'), 'utf8'));
-  assert.equal(manifest.kitVersion, pkg.version, 'manifest kitVersion != package version');
-  assert.equal(citation, pkg.version, 'CITATION.cff version != package version');
-  assert.equal(jsonld, pkg.version, 'jsonld softwareVersion != package version');
-  assert.equal(manifest.registryVersion, registry.registryVersion, 'manifest registryVersion != registry');
+test('every version surface agrees (run npm run version:sync)', () => {
+  assert.deepEqual(surfaceProblems(ROOT), []);
 });
 
 test('the published tarball ships manifest.json, CHANGELOG.md and docs/', () => {

@@ -36,6 +36,10 @@
     "test": "node --test && node scripts/selftest.mjs",
     "self-test": "node scripts/selftest.mjs",
     "manifest": "node scripts/manifest.mjs",
+    "version:sync": "node scripts/version.mjs sync",
+    "version:check": "node scripts/version.mjs check",
+    "version:tag": "node scripts/version.mjs tag",
+    "release": "node scripts/version.mjs release",
     "release:check": "node scripts/release-check.mjs"
   },
   "keywords": [

@@ -7,9 +7,11 @@ Project: **harness-kit** — canonical registry and zero-dependency primitives f
 ## Commands
 
 ```bash
-npm test            # node --test: coexistence spike, atomic/template, symlink state machine
-npm run self-test   # registry validation + sabotage fixtures + two-owner merge sweep
-npm run manifest    # regenerate manifest.json after any src/, registry/ or types/ change
+npm test              # node --test: coexistence spike, atomic/template, symlink state machine
+npm run self-test     # registry validation + sabotage fixtures + two-owner merge sweep
+npm run manifest      # regenerate manifest.json after any src/, registry/ or types/ change
+npm run version:check # fail if a version surface drifted from package.json
+npm run release       # sync + commit + tag the current (or bumped) version; publishing runs on tag push
 ```
 
 ## Repository map
@@ -27,6 +29,7 @@ npm run manifest    # regenerate manifest.json after any src/, registry/ or type
 | `src/registry.mjs` | loader + zero-dep structural validator |
 | `scripts/self-test.mjs` | sabotage-checked invariants + coexistence sweep |
 | `scripts/manifest.mjs` | deterministic hash manifest for vendored sync-checks |
+| `scripts/version.mjs` | single-source version: sync/check/bump/tag/release |
 | `docs/consumption.md` | vendoring + sync-check procedure |
 | `docs/coexistence.md` | multi-tool ownership convention |
 | `docs/dialects.md` | shape catalog + how to add a harness |
@@ -37,6 +40,8 @@ npm run manifest    # regenerate manifest.json after any src/, registry/ or type
 - **Do** keep the registry factual: one reconciled value per fact; disagreements between tools are policy knobs in consumer code, never registry columns.
 - **Do** bump `registryVersion` (semver) and add a `registry/CHANGELOG.md` entry for every registry change.
 - **Do** mark unverified harness behavior `status: "experimental"` with a note naming what to verify.
+- **Do** treat `package.json` as the only hand-edited version; `npm run version:sync` propagates it to `CITATION.cff`, `docs/jsonld.jsonld` and `manifest.json`.
+- **Do** release via `npm run release` so every version gets a `v*` tag (CI fails on main when the version is untagged) and a `CHANGELOG.md` section.
 - **Don't** add runtime dependencies — zero-dep is a product property.
 - **Don't** delete registry keys; deprecate in place (vendored consumers pin old versions).
 - **Don't** parse `notes` fields in code — they are human-only.
