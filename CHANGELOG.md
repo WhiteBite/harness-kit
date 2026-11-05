@@ -11,6 +11,7 @@ Security and robustness hardening:
 - Fixes: `checkInstall` no longer throws on a non-shell marker surface; `readOwnership`/`entryMatchesHash` tolerate malformed sidecar entries; `recordOwnership` keeps prior records for other locators of the same file; the first-line marker matches a CRLF file.
 - CLI: `vendor` requires the target to be a real harness-kit copy; `check` rejects manifest keys that escape the tree.
 - Hook shapes now have a single source of truth (`src/shapes.mjs`); the schema enum, `mergeHooks` and `collectCommands` derive from it, and an unknown shape fails loudly.
+- CLI gains a lockfile: `vendor` writes `harness-kit.lock` (versions, registry/schema sha256, tag), `check` validates the lock and reports staleness (fatal with `--strict`), `diff` shows what `update` would change, and `update` re-vendors from the installed kit. The manifest hash logic is shared via `src/manifest.mjs`.
 
 ## 0.8.0
 

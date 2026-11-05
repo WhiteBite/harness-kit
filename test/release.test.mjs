@@ -1,39 +1,17 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { computeManifest } from '../src/manifest.mjs';
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..');
-const VENDORED_DIRS = ['src', 'registry', 'types'];
-const normalize = (text) => text.replace(/\r\n/g, '\n');
-
-function walk(dir, out) {
-  for (const entry of readdirSync(dir).sort()) {
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) walk(full, out);
-    else out.push(full);
-  }
-  return out;
-}
-
-function computedHashes() {
-  const files = {};
-  for (const dir of VENDORED_DIRS) {
-    for (const file of walk(join(ROOT, dir), [])) {
-      const rel = relative(ROOT, file).split('\\').join('/');
-      files[rel] = createHash('sha256').update(normalize(readFileSync(file, 'utf8'))).digest('hex');
-    }
-  }
-  return files;
-}
 
 const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
 const manifest = JSON.parse(readFileSync(join(ROOT, 'manifest.json'), 'utf8'));
 
 test('manifest.json matches the current tree (run npm run manifest after changing src/registry/types)', () => {
-  assert.deepEqual(manifest.files, computedHashes(), 'manifest.json is stale; run `npm run manifest`');
+  assert.deepEqual(manifest.files, computeManifest(ROOT), 'manifest.json is stale; run `npm run manifest`');
 });
 
 test('every version surface agrees', () => {

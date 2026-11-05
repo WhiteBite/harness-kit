@@ -43,21 +43,24 @@ Re-copy the four vendored items from the kit version being adopted, in one commi
 
 ## 5. CLI
 
-The kit ships a zero-dep CLI so vendoring and the sync-check are one command:
+The kit ships a zero-dep CLI so vendoring, verification and upgrade are one command:
 
 ```bash
 npx @whitebite/harness-kit versions                    # kit + registry versions
-npx @whitebite/harness-kit vendor vendor/harness-kit   # copy the pinned kit, then verify
-npx @whitebite/harness-kit check vendor/harness-kit    # recompute manifest hashes, fail on drift
+npx @whitebite/harness-kit vendor vendor/harness-kit   # copy the pinned kit, write harness-kit.lock, verify
+npx @whitebite/harness-kit check vendor/harness-kit    # integrity + lock consistency; warns if behind
+npx @whitebite/harness-kit check vendor/harness-kit --strict   # also fails when the vendored kit is behind
+npx @whitebite/harness-kit diff vendor/harness-kit     # what `update` would change
+npx @whitebite/harness-kit update vendor/harness-kit   # re-vendor from the installed kit
 ```
 
-`vendor` refuses to overwrite a directory that is not a harness-kit copy (no `manifest.json`).
+`vendor` writes `harness-kit.lock` (kit and registry versions, the registry/schema sha256, the release tag) next to the vendored copy. `check` verifies the vendored bytes against the manifest and the lock and reports staleness (fatal only with `--strict`), so a deliberate pin stays green. `vendor` refuses to overwrite a directory that is not a harness-kit copy. Version selection is npm's job (`npm install @whitebite/harness-kit@X`, then `update`); the CLI never touches the network.
 
 ## 6. Language-neutral consumption (any language)
 
-The registry and schema are plain JSON, so a non-JS consumer needs no npm or node - pin an immutable tag:
+The registry and schema are plain JSON, so a non-JS consumer needs no npm or node. Vendor `registry/harnesses.json` and `harness-kit.lock` together and hash the file (EOL-normalized to LF, UTF-8, trailing newline kept) against `lock.files["registry/harnesses.json"]`. The lock records the release `tag` for rebuilding the raw URL:
 
-- `https://raw.githubusercontent.com/WhiteBite/harness-kit/vX.Y.Z/registry/harnesses.json`
-- `https://raw.githubusercontent.com/WhiteBite/harness-kit/vX.Y.Z/registry/harnesses.schema.json`
+- `https://raw.githubusercontent.com/WhiteBite/harness-kit/<tag>/registry/harnesses.json`
+- `https://raw.githubusercontent.com/WhiteBite/harness-kit/<tag>/registry/harnesses.schema.json`
 
-Verify the fetched file against the sha256 in `manifest.json` (`files["registry/harnesses.json"]`) before trusting it. Tags are immutable; `main` is not a pin.
+A git tag can be moved by someone with push access, so treat the tag as a locator and the lock's sha256 as the pin; verify the hash after every fetch. `main` is not a pin.

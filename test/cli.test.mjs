@@ -48,3 +48,56 @@ test('vendor refuses to overwrite a non-kit directory', () => {
 test('unknown command exits non-zero', () => {
   assert.throws(() => run(['frobnicate']));
 });
+
+test('vendor writes a lock, check validates it and diff reports changes', () => {
+  withTemp((dir) => {
+    const target = join(dir, 'vendor', 'harness-kit');
+    run(['vendor', target]);
+    const lock = JSON.parse(readFileSync(join(target, 'harness-kit.lock'), 'utf8'));
+    assert.equal(lock.lockVersion, 1);
+    assert.equal(typeof lock.files['registry/harnesses.json'], 'string');
+    assert.match(run(['diff', target]), /no file differences/);
+    const manifestPath = join(target, 'manifest.json');
+    const vendored = JSON.parse(readFileSync(manifestPath, 'utf8'));
+    vendored.files['src/index.mjs'] = '0'.repeat(64);
+    writeFileSync(manifestPath, `${JSON.stringify(vendored, null, 2)}\n`);
+    assert.match(run(['diff', target]), /~ src\/index\.mjs/);
+  });
+});
+
+test('check is green on a deliberate pin but --strict fails when the pin is behind', () => {
+  withTemp((dir) => {
+    const target = join(dir, 'vendor', 'harness-kit');
+    run(['vendor', target]);
+    for (const name of ['manifest.json', 'harness-kit.lock']) {
+      const path = join(target, name);
+      const data = JSON.parse(readFileSync(path, 'utf8'));
+      data.kitVersion = '0.0.1';
+      writeFileSync(path, `${JSON.stringify(data, null, 2)}\n`);
+    }
+    assert.match(run(['check', target]), /files match manifest/);
+    assert.throws(() => run(['check', target, '--strict']), /behind/);
+  });
+});
+
+test('check rejects a lock that disagrees with the manifest', () => {
+  withTemp((dir) => {
+    const target = join(dir, 'vendor', 'harness-kit');
+    run(['vendor', target]);
+    const lockPath = join(target, 'harness-kit.lock');
+    const lock = JSON.parse(readFileSync(lockPath, 'utf8'));
+    lock.registryVersion = '9.9.9';
+    writeFileSync(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
+    assert.throws(() => run(['check', target]), /disagrees/);
+  });
+});
+
+test('update re-vendors a tampered copy', () => {
+  withTemp((dir) => {
+    const target = join(dir, 'vendor', 'harness-kit');
+    run(['vendor', target]);
+    writeFileSync(join(target, 'src', 'index.mjs'), 'tampered\n');
+    run(['update', target]);
+    assert.match(run(['check', target]), /files match manifest/);
+  });
+});
