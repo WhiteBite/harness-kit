@@ -163,7 +163,7 @@ function detectIndent(text, object) {
 function renderMember(name, value, indent, eol) {
   const json = JSON.stringify(value, null, indent);
   const lines = json.split('\n');
-  const body = [lines[0], ...lines.slice(1).map((line) => indent + line)].join('\n');
+  const body = [lines[0], ...lines.slice(1).map((line) => indent + line)].join(eol);
   return `${eol}${indent}${JSON.stringify(name)}: ${body}`;
 }
 

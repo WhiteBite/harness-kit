@@ -119,9 +119,10 @@ test('a trailing comma in the container object is tolerated', () => {
 
 test('CRLF line endings are preserved', () => {
   const src = '{\r\n  "mcp": {\r\n    "mine": {}\r\n  }\r\n}\r\n';
-  const result = mergeJsoncContainer(src, { mine: { v: 1 }, mine2: { v: 2 } }, { container: 'mcp', isMine: (name) => name === 'mine' });
+  const result = mergeJsoncContainer(src, { mine: { v: 1 }, mine2: { command: 'npx', args: ['a'] } }, { container: 'mcp', isMine: (name) => name === 'mine' });
   assert.equal(result.text.includes('\r\n'), true);
-  assert.deepEqual(parseJsonc(result.text).mcp.mine2, { v: 2 });
+  assert.equal(/(?<!\r)\n/.test(result.text), false, 'inserted multi-line values must stay CRLF throughout');
+  assert.deepEqual(parseJsonc(result.text).mcp.mine2, { command: 'npx', args: ['a'] });
 });
 
 test('a leading BOM is preserved', () => {
