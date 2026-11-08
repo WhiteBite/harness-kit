@@ -59,6 +59,7 @@ export interface RegistryHarness {
   skills?: { global?: string[]; project?: string[] };
   rules?: RegistryRule[];
   manifests?: Record<string, string>;
+  envOverrides?: Record<string, string>;
   notes?: string;
 }
 

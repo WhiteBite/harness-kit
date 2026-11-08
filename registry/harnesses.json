@@ -17,7 +17,7 @@
       "{name}": "plugin module name"
     },
     "scopeResolution": "project paths resolve against the repository root; user paths against the home directory unless an envOverrides key is set",
-    "mcpPolicy": "MCP configs are keyed maps (server name -> server object). Container key, url field name and token-env syntax differ per client; the map is a shared file so writes must be owner-scoped by server name. Non-JSON formats (jsonc/toml) are print-only."
+    "mcpPolicy": "MCP configs are keyed maps (server name -> server object). Container key, url field name and token-env syntax differ per client; the map is a shared file so writes must be owner-scoped by server name. Non-JSON formats (jsonc/toml) either splice text comment-preserving and owner-scoped (`write: \"merge-text\"`) or stay print-only."
   },
   "harnesses": {
     "claude": {
@@ -192,7 +192,7 @@
         "tokenEnvSyntax": "${env:VAR}",
         "write": "merge",
         "source": "remote-devbox-mcp/home/rdm/prompt.py",
-        "note": "%APPDATA%\\devin\\mcp_config.json is a Windows variant of the same file"
+        "note": "no verified Windows-specific path variant - treat ~/.codeium/windsurf/mcp_config.json as canonical on Windows too"
       }
     },
     "aider": {
@@ -510,7 +510,7 @@
         "write": "merge-text"
       },
       "skills": { "global": ["~/.config/amp/skills"] },
-      "notes": "Closed-source (sourcegraph/amp repo is 404; docs at ampcode.com). No hook config - event-driven TS plugins. MCP lives under the literal top-level key `amp.mcpServers`; file may be .jsonc (kept print-only)."
+      "notes": "Closed-source (sourcegraph/amp repo is 404; docs at ampcode.com). No hook config - event-driven TS plugins. MCP lives under the literal top-level key `amp.mcpServers`; the .jsonc file is written via comment-preserving merge-text splicing."
     },
     "zcode": {
       "name": "ZCode",
@@ -518,7 +518,6 @@
       "hooks": {
         "config": { "project": ".zcode/config.json", "user": "~/.zcode/cli/config.json" },
         "write": "print-only",
-        "shape": "nested-hooks",
         "events": ["SessionStart", "UserPromptSubmit", "PreToolUse", "PermissionRequest", "PostToolUse", "PostToolUseFailure", "Stop"],
         "entryFields": { "type": "process|command", "timeoutUnit": "milliseconds" }
       },
@@ -534,7 +533,7 @@
         "write": "print-only",
         "note": "JSON only (JSONC unsupported); container is the nested path `mcp.servers`; no env interpolation - remote tokens go in `headers` or via `oauth`; `.agents/mcp.json` key `mcpServers` is a fallback only (no merge)"
       },
-      "notes": "Z.ai's GLM-5.3 harness (`zcode`). Hook events sit under `hooks.events.<Event>` matcher groups (extra `hooks.enabled`/`timeoutMs` envelope); `timeoutMs` is milliseconds, legacy `timeout` is seconds and loses to `timeoutMs`. Project hooks are ignored in current builds (repo contract says conditionally executed behind trust - verify). Instructions via AGENTS.md. Config is JSON only."
+      "notes": "Z.ai's GLM-5.3 harness (`zcode`). Hook events sit under `hooks.events.<Event>` matcher groups (extra `hooks.enabled`/`timeoutMs` envelope; no kit shape covers it, so the row stays print-only); `timeoutMs` is milliseconds, legacy `timeout` is seconds and loses to `timeoutMs`. Project hooks are ignored in current builds (repo contract says conditionally executed behind trust - verify). Instructions via AGENTS.md. Config is JSON only."
     },
     "deepseek": {
       "name": "DeepSeek Harness",

@@ -19,8 +19,8 @@
     "src/template.mjs": "a9293511c66420789e1762c3e083deb8fd195e167e3cd7b3c7ad1d20a26c8af5",
     "src/toml.mjs": "20dac33ad24f2185a975adacd0b5a5e57f718499abd84d007f03b908ba4552d7",
     "registry/CHANGELOG.md": "64c7a73d4e40e92f9a5721ce24fd5f644f976549e80386af6c90dbbf9e4650cc",
-    "registry/harnesses.json": "c8c3048987fa28108cf2a7baa803c5e1830b4e7434e2b783477975d9dca7b88d",
-    "registry/harnesses.schema.json": "124f335736f399f4c0807b083a558ccceea82676c82ecc1e6129f432107d0e24",
-    "types/index.d.mts": "4392d0258e58262cb849b9cbc20c39c4e441db058ceb6c62afda05dc5af0c7fd"
+    "registry/harnesses.json": "9c999b1ee146d8dfc860db3b83605400b023a9dd6b2bc5259edf10edaf6ecc89",
+    "registry/harnesses.schema.json": "0ed73b1b977e4bd18ee77b274199333eb03aa9ee1ae63dc2b66426c5191f5507",
+    "types/index.d.mts": "c2fb01633964c76501a4325df49210313c3d4d37707b42f044c35336f94b3cfd"
   }
 }

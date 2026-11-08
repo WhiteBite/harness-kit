@@ -19,9 +19,16 @@
     "harness": {
       "type": "object",
       "required": ["name", "status"],
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "stable" } }, "required": ["status"] },
+          "then": { "required": ["verified"] }
+        }
+      ],
       "properties": {
         "name": { "type": "string", "minLength": 1 },
         "status": { "enum": ["stable", "preview", "experimental"] },
+        "envOverrides": { "type": "object" },
         "verified": {
           "type": "object",
           "required": ["against", "at"],
@@ -36,6 +43,12 @@
             {
               "type": "object",
               "required": ["config", "write"],
+              "allOf": [
+                {
+                  "if": { "properties": { "write": { "const": "merge" } }, "required": ["write"] },
+                  "then": { "required": ["shape"] }
+                }
+              ],
               "properties": {
                 "config": {
                   "type": "object",
@@ -68,6 +81,16 @@
             {
               "type": "object",
               "required": ["config", "format", "container"],
+              "allOf": [
+                {
+                  "if": { "properties": { "write": { "const": "merge" } }, "required": ["write"] },
+                  "then": { "properties": { "format": { "const": "json" } } }
+                },
+                {
+                  "if": { "properties": { "write": { "const": "merge-text" } }, "required": ["write"] },
+                  "then": { "properties": { "format": { "enum": ["jsonc", "toml"] } } }
+                }
+              ],
               "properties": {
                 "status": { "enum": ["stable", "preview", "experimental"] },
                 "verified": {
