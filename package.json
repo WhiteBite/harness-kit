@@ -13,7 +13,10 @@
     "node": ">=18"
   },
   "exports": {
-    ".": "./src/index.mjs",
+    ".": {
+      "types": "./types/index.d.mts",
+      "default": "./src/index.mjs"
+    },
     "./registry": "./registry/harnesses.json",
     "./schema": "./registry/harnesses.schema.json"
   },
@@ -24,6 +27,7 @@
     "bin",
     "docs",
     "manifest.json",
+    "assets",
     "README.md",
     "llms.txt",
     "llms-full.txt",
