@@ -6,13 +6,28 @@
 
 ## Быстрый старт
 
+Потребление вендорингом, не runtime-зависимостью: скопируйте `src/`, `registry/`,
+`types/`, `manifest.json` в `vendor/harness-kit/` и закрепите sha256-sync-check
+([docs/consumption.md](docs/consumption.md)). Затем merge:
+
+```js
+import { mergeHooks } from './vendor/harness-kit/src/index.mjs';
+
+const merged = mergeHooks(existingConfig, template, { shape: 'nested-hooks', isMine });
+// чужие записи выживают; повторный merge байт-в-байт идентичен
+```
+
+Нулевые рантайм-зависимости, Node >= 18, чистый ESM (совместим с Bun).
+Опубликован в npm как `@whitebite/harness-kit` для обнаружимости; глубокие
+интеграции вендорят исходники за sha256-манифестом (см. [docs/consumption.md](docs/consumption.md)).
+
+## Разработка
+
 ```bash
 npm install
 npm test
 npm run self-test
 ```
-
-Нулевые рантайм-зависимости, Node >= 18, чистый ESM (совместим с Bun). Опубликован в npm как `@whitebite/harness-kit`; глубокие интеграции по-прежнему вендорят исходники за sha256-манифестом (см. [docs/consumption.md](docs/consumption.md)).
 
 ## Кому это нужно
 

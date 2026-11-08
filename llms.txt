@@ -16,6 +16,13 @@ This file follows the llms.txt convention: a short, LLM-friendly index of the pr
 - Install: `npm install`
 - Test: `npm run test`
 
+## Distribution tracking
+
+- Ledger: `.discoverability/submissions.json`, committed campaign state with schema `rdk-distribution/1`.
+- `rdk track` prints the live status (`--json` for the canonical object); `--adopt` pulls pre-ledger rdk/* PRs in, `--sync` rewrites recorded statuses from live probes, `--mark <target> --status <status>` overrides one row.
+- Every ledger write requires the guard chain `--apply --ack <ACK> --reason "<why>" --plan-digest <DIGEST>` (the digest of the dry-run preview).
+- Non-PR channels report live presence by probe: `crawl`, `http-search` and `registry-read`; PR channels report state via `gh`.
+
 ## Optional
 
 - [llms-full.txt](./llms-full.txt): the full documentation in a single file

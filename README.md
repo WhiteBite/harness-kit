@@ -8,13 +8,28 @@
 
 ## Quickstart
 
+Consume vendored, not as a runtime dependency: copy `src/`, `registry/`,
+`types/`, `manifest.json` into `vendor/harness-kit/` and pin them with the
+sha256 sync-check ([docs/consumption.md](docs/consumption.md)). Then merge:
+
+```js
+import { mergeHooks } from './vendor/harness-kit/src/index.mjs';
+
+const merged = mergeHooks(existingConfig, template, { shape: 'nested-hooks', isMine });
+// foreign entries survive; re-running the merge is byte-identical
+```
+
+Zero runtime dependencies, Node >= 18, plain ESM (Bun-compatible). Published to
+npm as `@whitebite/harness-kit` for discovery; deep integrations vendor the
+sources behind the sha256 manifest (see [docs/consumption.md](docs/consumption.md)).
+
+## Development
+
 ```bash
 npm install
 npm test
 npm run self-test
 ```
-
-Zero runtime dependencies, Node >= 18, plain ESM (Bun-compatible). Published to npm as `@whitebite/harness-kit`; deep integrations still vendor the sources behind the sha256 manifest (see [docs/consumption.md](docs/consumption.md)).
 
 ## Who is it for
 
