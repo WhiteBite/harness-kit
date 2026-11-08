@@ -83,11 +83,10 @@ export function applySync(root) {
     changed.push(JSONLD);
   }
 
-  const registryPath = join(root, REGISTRY);
-  const registry = JSON.parse(readFileSync(registryPath, 'utf8'));
-  if (registry.registryVersion !== version) {
-    registry.registryVersion = version;
-    writeJson(root, REGISTRY, registry);
+  const registryText = readText(root, REGISTRY);
+  const nextRegistry = registryText.replace(/^(\s*"registryVersion": ")[^"]+(")/m, `$1${version}$2`);
+  if (nextRegistry !== registryText) {
+    writeFileSync(join(root, REGISTRY), nextRegistry, 'utf8');
     changed.push(REGISTRY);
   }
 
@@ -141,8 +140,10 @@ function cmdCheck(root) {
 function cmdBump(root, level) {
   const pkg = readJson(root, PKG);
   const next = nextVersion(pkg.version, level);
-  pkg.version = next;
-  writeJson(root, PKG, pkg);
+  const pkgText = readText(root, PKG);
+  const nextPkg = pkgText.replace(/^(\s*"version": ")[^"]+(")/m, `$1${next}$2`);
+  if (nextPkg === pkgText) throw new Error('bump: package.json has no top-level "version" line');
+  writeFileSync(join(root, PKG), nextPkg, 'utf8');
   applySync(root);
   console.log(`version:bump: ${level} -> ${next}`);
   return 0;

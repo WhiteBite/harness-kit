@@ -61,3 +61,21 @@ test('surfaceProblems detects a hand-edited CITATION after sync', () => {
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('a registryVersion drift is reported and repaired in place', () => {
+  const root = fixture();
+  try {
+    applySync(root);
+    const registryPath = join(root, 'registry', 'harnesses.json');
+    const original = readFileSync(registryPath, 'utf8');
+    const version = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version;
+    const tampered = original.replace(`"registryVersion": "${version}"`, '"registryVersion": "9.9.9"');
+    assert.notEqual(tampered, original, 'the fixture registry must carry the package version');
+    writeFileSync(registryPath, tampered, 'utf8');
+    assert.match(surfaceProblems(root).join('\n'), /registry registryVersion 9\.9\.9 != package/);
+    assert.ok(applySync(root).includes('registry/harnesses.json'));
+    assert.equal(readFileSync(registryPath, 'utf8'), original, 'only the registryVersion line may change');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

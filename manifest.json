@@ -17,7 +17,7 @@
     "src/symlink.mjs": "7d84cff17f2a1840f6e6a6c85b7d685196af92f3c7f02eaf113d118dd523b971",
     "src/template.mjs": "03fe01081c2478af5cbd545f72a1d2ffebdf2392ce7f2aee778abd8c8431bd17",
     "registry/CHANGELOG.md": "e81d0a28c309993879ae8dae68abc8480a15dc3af986fc18786230b8eb706e04",
-    "registry/harnesses.json": "b025aaccde5c9c907384ea3a93fb7ea8321a83138d31f0e57a0b9904a415e5bf",
+    "registry/harnesses.json": "ceb917213068faea4250cb0a8732c8cd736394db805cb4678ed6789f41a9b647",
     "registry/harnesses.schema.json": "6952906533babe4d2323ad5924f82ca18e4aa0c8304133ff263aa0cdf88170dc",
     "types/index.d.mts": "71371f91bb8454158fb6ab3f522ec0e540929580d8620b2f7ae68eab02a37192"
   }
