@@ -81,6 +81,11 @@ test('renderTemplate leaves unknown placeholders untouched and is idempotent on 
   assert.equal(renderTemplate('{{UNKNOWN}}', {}), '{{UNKNOWN}}');
 });
 
+test('renderTemplate leaves prototype-chain keys untouched', () => {
+  assert.equal(renderTemplate('{{constructor}}', {}), '{{constructor}}');
+  assert.equal(renderTemplate('{{toString}} {{__proto__}}', {}), '{{toString}} {{__proto__}}');
+});
+
 test('renderPath expands {placeholders} and passes through paths without any', () => {
   assert.equal(renderPath('.kiro/hooks/{tool}.json', { tool: 'dejavu-gates' }), '.kiro/hooks/dejavu-gates.json');
   assert.equal(renderPath('.github/hooks/{tool}.json', { tool: 'stop-ai-slop' }), '.github/hooks/stop-ai-slop.json');

@@ -5,7 +5,7 @@ export function escapeForJsonString(value) {
 }
 
 export function renderTemplate(text, vars = {}) {
-  return String(text).replace(/\{\{([A-Za-z0-9_]+)\}\}/g, (match, key) => (key in vars ? escapeForJsonString(vars[key]) : match));
+  return String(text).replace(/\{\{([A-Za-z0-9_]+)\}\}/g, (match, key) => (Object.hasOwn(vars, key) ? escapeForJsonString(vars[key]) : match));
 }
 
 const PATH_PLACEHOLDER = /\{([^{}]+)\}/g;
