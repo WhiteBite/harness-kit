@@ -2,6 +2,11 @@
 
 Keep-a-changelog format. `registryVersion` mirrors the package `version`: there is one version everywhere (`npm run version:sync` sets it); historical registry-only versions live in `registry/CHANGELOG.md`.
 
+## 0.11.0
+
+- Comment-preserving MCP writes for non-JSON configs: `mergeJsoncContainer` (JSONC) and `mergeTomlTable` (TOML) splice an owner-scoped server map into text, preserving every foreign byte and comment and refusing any construct outside their supported subset. New `mcp.write: "merge-text"`; opencode and amp (jsonc) and codex (toml) move off `print-only`.
+- New `writeTextAtomic` (verbatim-bytes atomic writer) plus `scanJsonc` / `parseJsonc` / `scanTomlTables` helpers.
+
 ## 0.10.0
 
 - Owner-scoped MCP server-map merge (`mergeMcpServers`): six JSON, env-interpolated `mcp` rows (claude, gemini, cursor, windsurf, kiro, factory) move from `print-only` to `write: "merge"`.

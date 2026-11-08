@@ -6,6 +6,8 @@ import { join, relative } from 'node:path';
 import { loadRegistry, validateRegistry } from '../src/registry.mjs';
 import { mergeHooks } from '../src/merge.mjs';
 import { mergeMcpServers } from '../src/mcp.mjs';
+import { mergeJsoncContainer, parseJsonc } from '../src/jsonc.mjs';
+import { mergeTomlTable } from '../src/toml.mjs';
 import { writeMarkerBlock } from '../src/marker.mjs';
 import { checkDrift, collectCommands, extractCliPath } from '../src/drift.mjs';
 import { checkInstall } from '../src/doctor.mjs';
@@ -122,11 +124,12 @@ check('mcp: every mcp row declares config, format and container', () => {
     assert(mcp.config && typeof mcp.config === 'object', `${id}: mcp.config required`);
     assert(['json', 'jsonc', 'toml'].includes(mcp.format), `${id}: mcp.format invalid`);
     assert(typeof mcp.container === 'string' && mcp.container !== '', `${id}: mcp.container required`);
-    if (mcp.format !== 'json') assert(mcp.write === 'print-only', `${id}: non-JSON mcp must be print-only`);
+    if (mcp.format !== 'json') assert(mcp.write === 'print-only' || mcp.write === 'merge-text', `${id}: non-JSON mcp must be print-only or merge-text`);
     if (mcp.write === 'merge') {
       assert(mcp.format === 'json', `${id}: mcp write=merge requires json format`);
       assert(mcp.tokenEnvSyntax, `${id}: mcp write=merge requires real env interpolation`);
     }
+    if (mcp.write === 'merge-text') assert(mcp.format === 'jsonc' || mcp.format === 'toml', `${id}: mcp write=merge-text requires jsonc or toml`);
     swept += 1;
   }
   assert(swept >= 12, `expected at least 12 mcp rows, swept ${swept}`);
@@ -181,6 +184,38 @@ check('mcp coexistence sweep: two owners merge server maps, reinstall byte-ident
     swept += 1;
   }
   assert(swept >= 6, `expected at least 6 mergeable mcp rows, swept ${swept}`);
+});
+
+check('mcp merge-text sweep: two owners splice JSONC/TOML, reinstall stable, uninstall strips only own', () => {
+  let swept = 0;
+  for (const [id, entry] of Object.entries(registry.harnesses)) {
+    const mcp = entry.mcp;
+    if (!mcp || mcp.write !== 'merge-text') continue;
+    const container = mcp.container;
+    const isA = (name) => name === 'a';
+    const templateA = { a: { command: 'npx', args: ['-y', 'a'] } };
+    const templateB = { b: { command: 'npx', args: ['-y', 'b'] } };
+    const merge = mcp.format === 'toml' ? mergeTomlTable : mergeJsoncContainer;
+    const empty = mcp.format === 'toml' ? '' : '{}';
+    const has = (text, name) => (mcp.format === 'toml'
+      ? text.includes(`[${container}.${name}]`)
+      : Boolean((parseJsonc(text)[container] || {})[name]));
+
+    const step1 = merge(empty, templateA, { container, isMine: isA });
+    const step2 = merge(step1.text, templateB, { container, isMine: () => false });
+    assert(has(step2.text, 'a'), `${id}: own server lost after foreign splice`);
+    assert(has(step2.text, 'b'), `${id}: foreign server missing`);
+
+    const reinstall = merge(step2.text, templateA, { container, isMine: isA });
+    const reinstallAgain = merge(reinstall.text, templateA, { container, isMine: isA });
+    assert(reinstallAgain.changed === false && reinstallAgain.text === reinstall.text, `${id}: reinstall must be stable`);
+
+    const uninstalled = merge(reinstall.text, {}, { container, isMine: isA });
+    assert(!has(uninstalled.text, 'a'), `${id}: uninstall left own server behind`);
+    assert(has(uninstalled.text, 'b'), `${id}: uninstall removed a foreign server`);
+    swept += 1;
+  }
+  assert(swept >= 3, `expected at least 3 merge-text rows, swept ${swept}`);
 });
 
 check('provenance: every stable row declares verified{against, at}', () => {

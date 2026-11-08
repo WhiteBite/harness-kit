@@ -15,7 +15,7 @@ harness-kit is the **install substrate**: it answers "how do I write byte X into
 | Capability-pack / bundle abstraction | Fast-moving layer; the kit wires files, it does not define a bundle format. |
 | Marketplace / repository consumption | A consumer parameter (which catalog, which scope), never a registry column. |
 | Plugin-API versioning | Host plugin APIs churn; the kit only touches on-disk config. |
-| Non-JSON config *writing* (TOML, JSONC) | Zero-dep implies no parsers; such targets are `write: "print-only"`. |
+| General JSONC/TOML parsing or editing | No parser ships. The kit only splices one owner-scoped container via hand-rolled span scanners (`write: "merge-text"`) and refuses any file outside that subset. |
 | Command-dir install | No live consumer in the family today; `skills` + `linkDir` cover the real case. |
 | Plugin-manifest read/write | Manifests are static repo artifacts; no runtime consumer. |
 | Runtime harness behavior | The kit never runs inside a harness; install/build-time only. |
@@ -28,7 +28,7 @@ harness-kit is the **install substrate**: it answers "how do I write byte X into
 - For `root-events`, stripping runs over every top-level array, so a foreign non-event top-level array whose entries carry a matching command can be stripped (rare; restricting to declared `events` is a future option).
 - `canonicalJson` recurses per nesting level, so a pathologically deep config can overflow the stack (install-time, and only on untrusted input).
 - `resolveHooksDir` returns git's `core.hooksPath` unvalidated; the resulting write is still guarded by the symlink-component refusal, but the path is not contained to the repo.
-- MCP server maps merge owner-scoped by server name (`mergeMcpServers`) for JSON env-interpolated rows; TOML/JSONC rows stay `print-only` (no parser). MCP auth is modelled as flat optional fields (`tokenEnvSyntax`, `authField`); a structured `auth: { kind }` model (env-interpolated / env-var-name-field / literal / prompt-input) is planned but NOT built, because no live consumer reads those fields yet; extend the drift-guard when one does.
+- MCP server maps merge owner-scoped by server name two ways: `mergeMcpServers` for JSON files (parse then re-serialize), and `mergeJsoncContainer` / `mergeTomlTable` for JSONC/TOML (`write: "merge-text"`) via hand-rolled span scanners that preserve every foreign byte and comment. The JSONC/TOML path supports only a narrow subset and THROWS on anything else (non-object JSONC container; TOML inline table, dotted-key definition, array-of-tables, duplicate sub-table) - it is not a general parser. MCP auth is modelled as flat optional fields (`tokenEnvSyntax`, `authField`); a structured `auth: { kind }` model (env-interpolated / env-var-name-field / literal / prompt-input) is planned but NOT built, because no live consumer reads those fields yet; extend the drift-guard when one does.
 
 ## Growth rule
 
