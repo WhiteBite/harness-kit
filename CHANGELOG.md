@@ -2,6 +2,11 @@
 
 Keep-a-changelog format. `registryVersion` mirrors the package `version`: there is one version everywhere (`npm run version:sync` sets it); historical registry-only versions live in `registry/CHANGELOG.md`.
 
+## 1.10.5
+
+- `version:tag` now asserts the tagged commit carries the version; prereleases publish under the `next` dist-tag, a `workflow_dispatch` run only dry-runs, and `hasSection` no longer matches a prerelease prefix.
+- New opt-in pre-commit gate (`npm run hooks:install` → `.githooks/pre-commit` running `scripts/manifest.mjs --check`) fails a commit when `manifest.json` lags `src`/`registry`/`types`; the `package.json` bin path drops the redundant `./`.
+
 ## 1.10.4
 
 - Release-chain hardening: `npm run release` stages every version surface (registry included), refuses a dirty `src`/`registry`/`types` tree, refuses to move an existing tag, and pushes branch and tag together; `docs/jsonld.jsonld` is version-synced in place instead of re-serialized; `publish.yml` runs `version:check` and compares the exact version before skipping.
