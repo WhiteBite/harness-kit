@@ -11,7 +11,7 @@ export function extractCliPath(command, matcher) {
   }
   const quoted = command.match(/"([^"]+\.ts)"/);
   if (quoted !== null) return quoted[1];
-  const bare = command.match(/[^\s"]+\.ts/);
+  const bare = command.match(/[^\s"]+\.ts(?![A-Za-z0-9_])/);
   return bare === null ? null : bare[0];
 }
 

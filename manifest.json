@@ -5,7 +5,7 @@
   "files": {
     "src/atomic.mjs": "2053c7baecbe1a4d2afe6941a2ef952f57c5396671cda8efc064a86f1a64d5c9",
     "src/doctor.mjs": "d112f655d1a063ae1e3ac52d5ad62ad0dd8910a1822d82e83e3d13a2d7e67a7f",
-    "src/drift.mjs": "49a61a2c2018324317f3974e1f061a85066dce2049bc8a901462ab17a4b770fb",
+    "src/drift.mjs": "b04259238eeaa69c09e81babbb4fcb8f5972f0b4ffc35e60b084eed6ab37c079",
     "src/index.mjs": "2caeb0fc5633482a79051e4051c401abc8e47470fff5d14202091b80190e24fe",
     "src/jsonc.mjs": "143bd2d05257a9ed522b444f4722033eed1034bb560f91f4238331a91c4d8e7c",
     "src/manifest.mjs": "9724b86b0514055bdf635ef10619a7dc429f42a04c3d6749e430d756225ee37b",
@@ -21,6 +21,6 @@
     "registry/CHANGELOG.md": "64c7a73d4e40e92f9a5721ce24fd5f644f976549e80386af6c90dbbf9e4650cc",
     "registry/harnesses.json": "c8c3048987fa28108cf2a7baa803c5e1830b4e7434e2b783477975d9dca7b88d",
     "registry/harnesses.schema.json": "124f335736f399f4c0807b083a558ccceea82676c82ecc1e6129f432107d0e24",
-    "types/index.d.mts": "fde0db820fcd42c23859a9c12f2eb28932700a4c6458113ccdd90b62875936ba"
+    "types/index.d.mts": "ca70bcb23d155796996848a26013625c18ac56ad7c8db9735768a78504a390bd"
   }
 }

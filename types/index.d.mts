@@ -179,7 +179,6 @@ export interface CheckDriftOpts {
   shape: MergeShape;
   identify: (command: unknown) => boolean;
   pathExists: (cliPath: string) => boolean;
-  isMine?: (command: unknown) => boolean;
   extract?: (command: unknown) => string | null;
 }
 

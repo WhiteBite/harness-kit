@@ -12,6 +12,9 @@ test('extractCliPath: quoted .ts wins, bare .ts falls back, non-ts and non-strin
   assert.equal(extractCliPath('bun "C:\\tools\\cli.ts" pre'), 'C:\\tools\\cli.ts');
   assert.equal(extractCliPath('bun "/a/foo.mjs" /b/cli.ts pre'), '/b/cli.ts');
   assert.equal(extractCliPath('node /foreign/audit.js'), null);
+  assert.equal(extractCliPath('bun /x/cli.tsx pre'), null, 'a .tsx token must not truncate into a phantom .ts path');
+  assert.equal(extractCliPath('bun "/x/cli.tsx" pre'), null);
+  assert.equal(extractCliPath('bun /x/cli.tsbuildinfo'), null);
   assert.equal(extractCliPath(42), null);
   assert.equal(extractCliPath(null), null);
 });
