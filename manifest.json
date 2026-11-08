@@ -3,7 +3,7 @@
   "kitVersion": "1.10.5",
   "registryVersion": "1.10.5",
   "files": {
-    "src/atomic.mjs": "49e42360b908ea90b40f379e107c3e6a5c541cabdc6292cf0c4c3288cb8aefa3",
+    "src/atomic.mjs": "2053c7baecbe1a4d2afe6941a2ef952f57c5396671cda8efc064a86f1a64d5c9",
     "src/doctor.mjs": "d112f655d1a063ae1e3ac52d5ad62ad0dd8910a1822d82e83e3d13a2d7e67a7f",
     "src/drift.mjs": "49a61a2c2018324317f3974e1f061a85066dce2049bc8a901462ab17a4b770fb",
     "src/index.mjs": "2caeb0fc5633482a79051e4051c401abc8e47470fff5d14202091b80190e24fe",

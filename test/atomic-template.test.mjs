@@ -64,6 +64,22 @@ test('readJsonConfig: absent is null, malformed aborts with ConfigParseError, no
     const ok = join(dir, 'ok.json');
     writeFileSync(ok, '{"a":1}');
     assert.deepEqual(readJsonConfig(ok), { a: 1 });
+    const bom = join(dir, 'bom.json');
+    writeFileSync(bom, '\uFEFF{"a":1}');
+    assert.deepEqual(readJsonConfig(bom), { a: 1 }, 'a PowerShell-era BOM must not read as broken JSON');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('writeJsonAtomic refuses a symlinked backup target', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'hk-atomic-'));
+  try {
+    const path = join(dir, 'config.json');
+    writeFileSync(path, '{"a":1}');
+    const backup = `${path}.harness-kit.bak`;
+    symlinkSync(dir, backup, process.platform === 'win32' ? 'junction' : 'dir');
+    assert.throws(() => writeJsonAtomic(path, { a: 2 }), /symlink/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

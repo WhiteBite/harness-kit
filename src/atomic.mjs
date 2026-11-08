@@ -1,6 +1,6 @@
 /** Atomic JSON config writes: validate before touching disk, skip byte-identical rewrites, optional retained backup, refuse symlinks, retry locked renames on Windows. */
 import { randomBytes } from 'node:crypto';
-import { copyFileSync, chmodSync, existsSync, lstatSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, closeSync, copyFileSync, existsSync, fsyncSync, lstatSync, mkdirSync, openSync, readFileSync, renameSync, rmSync, writeSync } from 'node:fs';
 import { basename, dirname, join, parse, resolve, sep } from 'node:path';
 
 export class ConfigParseError extends Error {
@@ -11,10 +11,10 @@ export class ConfigParseError extends Error {
   }
 }
 
-/** Absent file reads as null; a malformed or non-object file aborts instead of being clobbered. */
+/** Absent file reads as null; a malformed or non-object file aborts instead of being clobbered. Tolerates a UTF-8 BOM (common in PowerShell-edited files). */
 export function readJsonConfig(path) {
   if (!existsSync(path)) return null;
-  const raw = readFileSync(path, 'utf8');
+  const raw = readFileSync(path, 'utf8').replace(/^\uFEFF/, '');
   let parsed;
   try {
     parsed = JSON.parse(raw);
@@ -65,10 +65,18 @@ export function writeTextAtomic(path, text, { backup = true, validate } = {}) {
   if (stat !== null && readFileSync(path, 'utf8') === text) return;
   mkdirSync(dirname(path), { recursive: true });
   if (stat && backup) {
-    copyFileSync(path, `${path}.harness-kit.bak`);
+    const backupPath = `${path}.harness-kit.bak`;
+    assertNoSymlinkComponents(backupPath);
+    copyFileSync(path, backupPath);
   }
   const tmp = join(dirname(path), `.${basename(path)}.${process.pid}.${randomBytes(6).toString('hex')}.tmp`);
-  writeFileSync(tmp, text, 'utf8');
+  const fd = openSync(tmp, 'w');
+  try {
+    writeSync(fd, text);
+    fsyncSync(fd);
+  } finally {
+    closeSync(fd);
+  }
   let renamed = false;
   for (let attempt = 0; attempt < RENAME_RETRIES && !renamed; attempt += 1) {
     try {
@@ -89,7 +97,5 @@ export function writeTextAtomic(path, text, { backup = true, validate } = {}) {
 }
 
 export function writeJsonAtomic(path, data, { backup = true } = {}) {
-  const serialized = `${JSON.stringify(data, null, 2).replace(/\r\n/g, '\n')}\n`;
-  writeTextAtomic(path, serialized, { backup, validate: (text) => JSON.parse(text) });
-  JSON.parse(readFileSync(path, 'utf8'));
+  writeTextAtomic(path, `${JSON.stringify(data, null, 2)}\n`, { backup, validate: (text) => JSON.parse(text) });
 }
