@@ -1,34 +1,40 @@
 {
   "theme": "opencode",
-  "windowTitle": "wire slop-gate into harnesses",
+  "windowTitle": "harness configs",
   "takeaway": "One owner-scoped merge call replaces three hand-edited harness configs",
 
   "before": {
+    "surface": "files",
     "caption": "hand-edited, drifting",
-    "sessionTitle": "# wire slop-gate into every harness",
+    "windowTitle": "harness configs",
+    "sessionTitle": "three configs, three dialects",
     "blocks": [
-      { "type": "user", "text": "wire the slop-gate hook into every harness" },
-      { "type": "prose", "text": "I'll hand-edit each harness config." },
-      { "type": "diff", "lines": [
-        { "type": "del", "text": "claude    .claude/settings.json" },
-        { "type": "del", "text": "codex     .codex/hooks.json" },
-        { "type": "del", "text": "opencode  .opencode/plugin/slop-gate.ts" }
+      { "type": "file", "path": ".claude/settings.json", "lines": [
+        { "type": "del", "text": "\"PreToolUse\": [{ \"command\": \"node scan.mjs\" }]" }
+      ] },
+      { "type": "file", "path": ".codex/hooks.json", "lines": [
+        { "type": "del", "text": "\"PreToolUse\": [{ \"command\": \"./scan.mjs --pre\" }]" }
+      ] },
+      { "type": "file", "path": ".opencode/plugin/slop-gate.ts", "lines": [
+        { "type": "del", "text": "export default { id: \"slopgate\" }" }
       ] },
       { "type": "status", "text": "3 harnesses, 3 dialects, 3 strings" }
     ]
   },
 
   "after": {
+    "surface": "files",
     "caption": "one merge, consistent",
-    "sessionTitle": "# wire slop-gate into every harness",
+    "windowTitle": "harness-kit registry",
+    "sessionTitle": "one registry, one call",
     "blocks": [
-      { "type": "user", "text": "wire the slop-gate hook into every harness" },
-      { "type": "prose", "text": "One mergeHooks call per harness, owner-scoped." },
-      { "type": "diff", "lines": [
-        { "type": "add", "text": "claude    node scan.mjs" },
-        { "type": "add", "text": "codex     node scan.mjs" },
-        { "type": "add", "text": "opencode  slop-gate" }
+      { "type": "file", "path": "slop-gate.js", "lines": [
+        { "type": "add", "left": "export default {", "right": "" },
+        { "type": "add", "left": "id: \"slop-gate\",", "right": "" },
+        { "type": "add", "left": "PreToolUse: [{ command: \"node scan.mjs\" }],", "right": "" },
+        { "type": "add", "left": "}", "right": "" }
       ] },
+      { "type": "tool", "text": "mergeHooks(repoRoot, \"slop-gate\")" },
       { "type": "done", "text": "3 harnesses, 1 template, 0 drift" }
     ]
   }
