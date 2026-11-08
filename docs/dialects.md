@@ -17,6 +17,27 @@ Event names and timeout units differ per harness and are registry facts (`events
 
 Templates are supplied in the target shape's native carrier: `{hooks:{Event:[entries]}}` for container shapes, `{Event:[entries]}` for root-events, `{version, hooks:[entries]}` for hooks-array.
 
+## MCP container dialects
+
+MCP configs are keyed maps (server name -> server object). Container key, url field and token-env syntax differ per client (registry `mcp` block):
+
+| Client | Container | url field | token syntax | write |
+| --- | --- | --- | --- | --- |
+| claude | `mcpServers` | `url` | `${VAR}` | merge |
+| gemini | `mcpServers` | `httpUrl` | `${VAR}` | merge |
+| cursor | `mcpServers` | `url` | `${env:VAR}` | merge |
+| windsurf | `mcpServers` | `url` | `${env:VAR}` | merge |
+| kiro | `mcpServers` | `url` | `${VAR}` | merge |
+| factory | `mcpServers` | `url` | `${VAR}` | merge |
+| codex | `mcp_servers` | `url` | env var name (`bearer_token_env_var`) | print-only |
+| opencode | `mcp` | `url` | `{env:VAR}` | print-only |
+| vscode | `servers` | `url` | `${input:VAR}` | print-only |
+| cline | `mcpServers` | `url` | literal | print-only |
+| roo | `mcpServers` | `url` | literal | print-only |
+| zed | `context_servers` | `url` | literal | print-only |
+
+MCP writes are owner-scoped merges keyed by server NAME (`mergeMcpServers`): a template name replaces the same-named entry, foreign servers and foreign top-level keys survive, and an empty template uninstalls only the caller's servers. Non-JSON formats (jsonc/toml) and literal-token rows stay `print-only`.
+
 ## Adding a harness
 
 1. Add a row to `registry/harnesses.json`: name, status, `hooks.config` paths, write mode, shape, events, timeoutUnit, `envOverrides` where the harness documents them.

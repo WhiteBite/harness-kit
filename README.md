@@ -26,6 +26,7 @@ Zero runtime dependencies, Node >= 18, plain ESM (Bun-compatible). Published to 
 
 - Look up the canonical config path, hook shape, event names and timeout unit for any supported harness.
 - Merge your hook entries into a shared config without touching another tool's entries (owner-scoped strip-then-append).
+- Merge MCP servers into a shared config without touching another tool's servers (owner-scoped by server name).
 - Track which entries you own via a hashed sidecar manifest, immune to command-string drift.
 - Write JSON configs atomically with validated backups, symlink refusal and Windows rename retries.
 - Install agent skills into harness skill directories with safe state classification (never clobbers manual content).

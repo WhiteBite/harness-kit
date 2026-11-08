@@ -28,7 +28,7 @@ harness-kit is the **install substrate**: it answers "how do I write byte X into
 - For `root-events`, stripping runs over every top-level array, so a foreign non-event top-level array whose entries carry a matching command can be stripped (rare; restricting to declared `events` is a future option).
 - `canonicalJson` recurses per nesting level, so a pathologically deep config can overflow the stack (install-time, and only on untrusted input).
 - `resolveHooksDir` returns git's `core.hooksPath` unvalidated; the resulting write is still guarded by the symlink-component refusal, but the path is not contained to the repo.
-- MCP auth is modelled as flat optional fields (`tokenEnvSyntax`, `authField`). A structured `auth: { kind }` model (env-interpolated / env-var-name-field / literal / prompt-input) is planned but NOT built, because no live consumer reads those fields yet; extend the drift-guard when one does.
+- MCP server maps merge owner-scoped by server name (`mergeMcpServers`) for JSON env-interpolated rows; TOML/JSONC rows stay `print-only` (no parser). MCP auth is modelled as flat optional fields (`tokenEnvSyntax`, `authField`); a structured `auth: { kind }` model (env-interpolated / env-var-name-field / literal / prompt-input) is planned but NOT built, because no live consumer reads those fields yet; extend the drift-guard when one does.
 
 ## Growth rule
 

@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { loadRegistry, validateRegistry } from '../src/registry.mjs';
 import { mergeHooks } from '../src/merge.mjs';
+import { mergeMcpServers } from '../src/mcp.mjs';
 import { writeMarkerBlock } from '../src/marker.mjs';
 import { checkDrift, collectCommands, extractCliPath } from '../src/drift.mjs';
 import { checkInstall } from '../src/doctor.mjs';
@@ -122,6 +123,10 @@ check('mcp: every mcp row declares config, format and container', () => {
     assert(['json', 'jsonc', 'toml'].includes(mcp.format), `${id}: mcp.format invalid`);
     assert(typeof mcp.container === 'string' && mcp.container !== '', `${id}: mcp.container required`);
     if (mcp.format !== 'json') assert(mcp.write === 'print-only', `${id}: non-JSON mcp must be print-only`);
+    if (mcp.write === 'merge') {
+      assert(mcp.format === 'json', `${id}: mcp write=merge requires json format`);
+      assert(mcp.tokenEnvSyntax, `${id}: mcp write=merge requires real env interpolation`);
+    }
     swept += 1;
   }
   assert(swept >= 12, `expected at least 12 mcp rows, swept ${swept}`);
@@ -137,6 +142,45 @@ check('sabotage: mcp without container is caught', () => {
   const bad = clone(registry);
   delete bad.harnesses.cursor.mcp.container;
   assert(validateRegistry(bad).length > 0, 'mcp.container must be required');
+});
+
+check('sabotage: an unknown mcp write mode is caught', () => {
+  const bad = clone(registry);
+  bad.harnesses.claude.mcp.write = 'sideways';
+  assert(validateRegistry(bad).length > 0, 'unknown mcp.write must be rejected');
+});
+
+check('sabotage: mcp write=merge with a non-json format is caught', () => {
+  const bad = clone(registry);
+  bad.harnesses.claude.mcp.format = 'toml';
+  assert(validateRegistry(bad).length > 0, 'mcp write=merge must require json format');
+});
+
+check('mcp coexistence sweep: two owners merge server maps, reinstall byte-identical, uninstall strips only own', () => {
+  let swept = 0;
+  for (const [id, entry] of Object.entries(registry.harnesses)) {
+    const mcp = entry.mcp;
+    if (!mcp || mcp.write !== 'merge') continue;
+    const container = mcp.container;
+    const isA = (name) => name === 'a';
+    const templateA = { a: { command: 'npx', args: ['-y', 'a'] } };
+    const templateB = { b: { command: 'npx', args: ['-y', 'b'] } };
+
+    const step1 = mergeMcpServers({}, templateA, { container, isMine: isA });
+    const step2 = mergeMcpServers(step1, templateB, { container, isMine: () => false });
+    assert(step2[container].a, `${id}: own server lost after foreign merge`);
+    assert(step2[container].b, `${id}: foreign server missing`);
+
+    const reinstall = mergeMcpServers(step2, templateA, { container, isMine: isA });
+    const reinstallAgain = mergeMcpServers(reinstall, templateA, { container, isMine: isA });
+    assert(JSON.stringify(reinstallAgain) === JSON.stringify(reinstall), `${id}: reinstall must be byte-identical`);
+
+    const uninstalled = mergeMcpServers(reinstall, {}, { container, isMine: isA });
+    assert(!uninstalled[container].a, `${id}: uninstall left own server behind`);
+    assert(uninstalled[container].b, `${id}: uninstall removed a foreign server`);
+    swept += 1;
+  }
+  assert(swept >= 6, `expected at least 6 mergeable mcp rows, swept ${swept}`);
 });
 
 check('provenance: every stable row declares verified{against, at}', () => {
