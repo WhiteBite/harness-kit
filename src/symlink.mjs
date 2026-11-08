@@ -2,10 +2,12 @@
 import { existsSync, lstatSync, mkdirSync, readlinkSync, rmSync, symlinkSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
-function normalizeLinkTarget(raw) {
+/** Windows junctions report rooted targets with a device prefix (\\?\C:\, \\?\UNC\server\share, \??\C:\); strip it before comparing. */
+export function normalizeLinkTarget(raw) {
   const value = String(raw);
-  // Windows junctions report targets with the extended-length prefix; strip it before comparing
-  return value.startsWith('\\\\?\\') ? value.slice(4) : value;
+  if (value.startsWith('\\\\?\\UNC\\')) return `\\\\${value.slice(8)}`;
+  if (value.startsWith('\\\\?\\') || value.startsWith('\\??\\')) return value.slice(4);
+  return value;
 }
 
 function samePath(a, b) {
@@ -15,7 +17,7 @@ function samePath(a, b) {
 }
 
 /** absent | linked (ours) | foreign-link (points elsewhere) | manual (real directory or file). */
-export function linkState(target, source) {
+export function linkState(source, target) {
   let stat = null;
   try {
     stat = lstatSync(target);
@@ -35,8 +37,12 @@ export function linkState(target, source) {
 }
 
 export function linkDir(source, target) {
-  const state = linkState(target, source);
-  if (state === 'linked') return { state, ok: true, action: 'already-linked' };
+  const absolute = resolve(source);
+  const state = linkState(absolute, target);
+  if (state === 'linked') {
+    if (!existsSync(absolute)) return { state, ok: false, action: `skipped (link dangles at a missing source: ${absolute})` };
+    return { state, ok: true, action: 'already-linked' };
+  }
   if (state === 'manual' || state === 'foreign-link') {
     return { state, ok: false, action: `skipped (${state} content present at ${target})` };
   }
@@ -46,7 +52,7 @@ export function linkDir(source, target) {
       if (!existsSync(dirname(parent))) return { state, ok: false, action: 'skipped (harness not installed)' };
       mkdirSync(parent, { recursive: true });
     }
-    symlinkSync(source, target, process.platform === 'win32' ? 'junction' : 'dir');
+    symlinkSync(absolute, target, process.platform === 'win32' ? 'junction' : 'dir');
   } catch (error) {
     return { state, ok: false, action: `skipped (${error && error.code ? error.code : 'link failed'})` };
   }
@@ -54,7 +60,7 @@ export function linkDir(source, target) {
 }
 
 export function unlinkDir(source, target) {
-  const state = linkState(target, source);
+  const state = linkState(resolve(source), target);
   if (state === 'absent') return { state, ok: true, action: 'already-absent' };
   if (state !== 'linked') return { state, ok: false, action: `skipped (${state})` };
   rmSync(target, { recursive: true, force: true });

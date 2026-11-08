@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, symlinkSync, existsSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readlinkSync, rmSync, symlinkSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { linkState, linkDir, unlinkDir } from '../src/symlink.mjs';
+import { isAbsolute, join } from 'node:path';
+import { linkState, linkDir, unlinkDir, normalizeLinkTarget } from '../src/symlink.mjs';
 
 function makeSource(dir, name) {
   const source = join(dir, name);
@@ -24,7 +24,8 @@ test('linkDir links into an existing harness dir, reports already-linked, and un
     assert.equal(first.action, 'linked');
     assert.equal(first.ok, true);
     assert.equal(readFileSync(join(target, 'SKILL.md'), 'utf8'), '# my-skill\n');
-    assert.equal(linkState(target, source), 'linked');
+    assert.equal(linkState(source, target), 'linked');
+    assert.equal(isAbsolute(normalizeLinkTarget(readlinkSync(target))), true, 'the stored target must be absolute');
 
     const second = linkDir(source, target);
     assert.equal(second.action, 'already-linked');
@@ -71,11 +72,11 @@ test('linkDir classifies a link to another source as foreign and skips it', () =
     const target = join(harnessDir, 'skills', 'shared-name');
     symlinkSync(theirs, target, process.platform === 'win32' ? 'junction' : 'dir');
 
-    assert.equal(linkState(target, mine), 'foreign-link');
+    assert.equal(linkState(mine, target), 'foreign-link');
     const result = linkDir(mine, target);
     assert.equal(result.ok, false);
     assert.match(result.action, /foreign-link/);
-    assert.equal(linkState(target, theirs), 'linked', 'the foreign link still resolves for its real owner');
+    assert.equal(linkState(theirs, target), 'linked', 'the foreign link still resolves for its real owner');
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -93,4 +94,31 @@ test('linkDir skips when the harness itself is not installed', () => {
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('linkDir flags an own link whose source went missing instead of reporting healthy', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'hk-link-'));
+  try {
+    const source = makeSource(dir, 'my-skill');
+    const harnessDir = join(dir, 'home', '.claude');
+    mkdirSync(harnessDir, { recursive: true });
+    const target = join(harnessDir, 'skills', 'my-skill');
+    linkDir(source, target);
+    rmSync(source, { recursive: true, force: true });
+    const result = linkDir(source, target);
+    assert.equal(result.state, 'linked');
+    assert.equal(result.ok, false);
+    assert.match(result.action, /dangl/);
+    assert.equal(unlinkDir(source, target).action, 'removed', 'uninstall still removes our own dangling link');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('normalizeLinkTarget strips every Windows rooted-target prefix form', () => {
+  assert.equal(normalizeLinkTarget('\\\\?\\C:\\skills\\x'), 'C:\\skills\\x');
+  assert.equal(normalizeLinkTarget('\\\\?\\UNC\\server\\share\\x'), '\\\\server\\share\\x');
+  assert.equal(normalizeLinkTarget('\\??\\C:\\skills\\x'), 'C:\\skills\\x');
+  assert.equal(normalizeLinkTarget('C:\\plain'), 'C:\\plain');
+  assert.equal(normalizeLinkTarget('/plain/path'), '/plain/path');
 });

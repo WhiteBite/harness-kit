@@ -242,6 +242,7 @@ export function recordOwnership(root: string, owner: string, file: string, confi
 export function ownedLocators(root: string, owner: string, file?: string): OwnershipRecord[];
 export function entryMatchesHash(config: Record<string, unknown>, record: OwnershipRecord): boolean;
 
-export function linkState(target: string, source: string): LinkResult['state'];
+export function linkState(source: string, target: string): LinkResult['state'];
 export function linkDir(source: string, target: string): LinkResult;
 export function unlinkDir(source: string, target: string): LinkResult;
+export function normalizeLinkTarget(raw: unknown): string;
