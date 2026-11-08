@@ -195,6 +195,5 @@ test('a deep value does not overflow the stack', () => {
   for (let i = 0; i < 200; i += 1) value = { n: value };
   const src = `{\n  "mcp": {\n    "mine": ${JSON.stringify(value)}\n  }\n}`;
   const result = mergeJsoncContainer(src, { mine: { v: 1 } }, { container: 'mcp', isMine });
-  assert.deepEqual(parseJsonc(result.text).mcp.mine, { v: 1 });
-  assert.equal(result.text.includes('{"n":'), true, 'the replaced deep value must actually have been spliced in from a deep fixture');
+  assert.deepEqual(parseJsonc(result.text).mcp.mine, { v: 1 }, 'the deep own member must be replaced, not crash');
 });
