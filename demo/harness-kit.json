@@ -1,5 +1,5 @@
 {
-  "theme": "opencode",
+  "theme": "shell",
   "windowTitle": "harness configs",
   "takeaway": "One owner-scoped merge call replaces three hand-edited harness configs",
 
@@ -7,18 +7,22 @@
     "surface": "files",
     "caption": "hand-edited, drifting",
     "windowTitle": "harness configs",
-    "sessionTitle": "three configs, three dialects",
+    "sessionTitle": "three configs, three paths",
     "blocks": [
       { "type": "file", "path": ".claude/settings.json", "lines": [
-        { "type": "del", "text": "\"PreToolUse\": [{ \"command\": \"node scan.mjs\" }]" }
+        { "type": "del", "text": "\"PreToolUse\": [{" },
+        { "type": "del", "text": "\"matcher\": \"Write|Edit\"," },
+        { "type": "del", "text": "\"hooks\": [{ \"type\": \"command\"," }
       ] },
       { "type": "file", "path": ".codex/hooks.json", "lines": [
-        { "type": "del", "text": "\"PreToolUse\": [{ \"command\": \"./scan.mjs --pre\" }]" }
+        { "type": "del", "text": "\"PreToolUse\": [{" },
+        { "type": "del", "text": "\"matcher\": \"Write|Edit|MultiEdit\"," },
+        { "type": "del", "text": "\"hooks\": [{ \"type\": \"command\"," }
       ] },
       { "type": "file", "path": ".opencode/plugin/slop-gate.ts", "lines": [
-        { "type": "del", "text": "export default { id: \"slopgate\" }" }
+        { "type": "del", "text": "export { default } from \"/abs/slop-gate.js\";" }
       ] },
-      { "type": "status", "text": "3 harnesses, 3 dialects, 3 strings" }
+      { "type": "status", "text": "3 harnesses, 3 config files, 3 hand-edits" }
     ]
   },
 
@@ -28,14 +32,12 @@
     "windowTitle": "harness-kit registry",
     "sessionTitle": "one registry, one call",
     "blocks": [
-      { "type": "file", "path": "slop-gate.js", "lines": [
-        { "type": "add", "left": "export default {", "right": "" },
-        { "type": "add", "left": "id: \"slop-gate\",", "right": "" },
-        { "type": "add", "left": "PreToolUse: [{ command: \"node scan.mjs\" }],", "right": "" },
-        { "type": "add", "left": "}", "right": "" }
+      { "type": "file", "path": "registry/harnesses.json", "lines": [
+        { "type": "add", "text": "\"write\": \"merge\"," },
+        { "type": "add", "text": "\"shape\": \"nested-hooks\"," }
       ] },
-      { "type": "tool", "text": "mergeHooks(repoRoot, \"slop-gate\")" },
-      { "type": "done", "text": "3 harnesses, 1 template, 0 drift" }
+      { "type": "tool", "kind": "call", "text": "mergeHooks(existing, template, { shape, isMine })" },
+      { "type": "done", "text": "3 harnesses, 1 registry, 0 drift" }
     ]
   }
 }
