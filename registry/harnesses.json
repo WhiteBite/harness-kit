@@ -1,7 +1,7 @@
 {
   "$schema": "./harnesses.schema.json",
   "schemaVersion": 1,
-  "registryVersion": "0.5.0",
+  "registryVersion": "0.6.0",
   "conventions": {
     "ownership": {
       "sidecar": ".harness-kit/ownership.json",
@@ -511,6 +511,37 @@
       },
       "skills": { "global": ["~/.config/amp/skills"] },
       "notes": "Closed-source (sourcegraph/amp repo is 404; docs at ampcode.com). No hook config - event-driven TS plugins. MCP lives under the literal top-level key `amp.mcpServers`; file may be .jsonc (kept print-only)."
+    },
+    "zcode": {
+      "name": "ZCode",
+      "status": "experimental",
+      "hooks": {
+        "config": { "project": ".zcode/config.json", "user": "~/.zcode/cli/config.json" },
+        "write": "print-only",
+        "shape": "nested-hooks",
+        "events": ["SessionStart", "UserPromptSubmit", "PreToolUse", "PermissionRequest", "PostToolUse", "PostToolUseFailure", "Stop"],
+        "entryFields": { "type": "process|command", "timeoutUnit": "milliseconds" }
+      },
+      "skills": { "global": ["~/.zcode/skills", "~/.agents/skills", "~/.claude/skills"], "project": [".zcode/skills", ".agents/skills", ".claude/skills"] },
+      "mcp": {
+        "status": "experimental",
+        "config": { "project": ".zcode/config.json", "user": "~/.zcode/cli/config.json" },
+        "format": "json",
+        "container": "mcp.servers",
+        "urlField": "url",
+        "typeField": "type",
+        "tokenEnvSyntax": null,
+        "write": "print-only",
+        "note": "JSON only (JSONC unsupported); container is the nested path `mcp.servers`; no env interpolation - remote tokens go in `headers` or via `oauth`; `.agents/mcp.json` key `mcpServers` is a fallback only (no merge)"
+      },
+      "notes": "Z.ai's GLM-5.3 harness (`zcode`). Hook events sit under `hooks.events.<Event>` matcher groups (extra `hooks.enabled`/`timeoutMs` envelope); `timeoutMs` is milliseconds, legacy `timeout` is seconds and loses to `timeoutMs`. Project hooks are ignored in current builds (repo contract says conditionally executed behind trust - verify). Instructions via AGENTS.md. Config is JSON only."
+    },
+    "deepseek": {
+      "name": "DeepSeek Harness",
+      "status": "experimental",
+      "hooks": null,
+      "skills": { "global": ["~/.dsh/skills", "~/.agents/skills"], "project": [".dsh/skills", ".agents/skills"] },
+      "notes": "Config is a Cordis plugin composition: ordered YAML patch layers (`$DSH_HOME/cordis.patch.yml`, profile `cordis.patch.yml`) over a JSON profile manifest - no hook/MCP JSON file surface. Hooks exist only as opt-in bridges that read Claude Code / Codex `hooks.json`. MCP servers are per-server `dsh-mcp-client` plugin rows in YAML. Skills: `<name>/SKILL.md` or flat `<name>.md`, nested `**/SKILL.md` unsupported. Instructions via AGENTS.md (+ CLAUDE.md)."
     },
     "git": {
       "name": "git (pre-commit enforcement surface)",

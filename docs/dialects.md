@@ -35,8 +35,11 @@ MCP configs are keyed maps (server name -> server object). Container key, url fi
 | cline | `mcpServers` | `url` | literal | print-only |
 | roo | `mcpServers` | `url` | literal | print-only |
 | zed | `context_servers` | `url` | literal | print-only |
+| zcode | `mcp.servers` | `url` | literal (headers/oauth) | print-only |
 
 MCP writes are owner-scoped merges keyed by server NAME (`mergeMcpServers`): a template name replaces the same-named entry, foreign servers and foreign top-level keys survive, and an empty template uninstalls only the caller's servers. Non-JSON formats (jsonc/toml) and literal-token rows stay `print-only`.
+
+Not every harness conforms. `zcode` nests its server map under `mcp.servers` and its hooks under `hooks.events.<Event>` (both print-only). `deepseek` (DeepSeek Harness) is a Cordis YAML plugin composition with no hook/MCP JSON file surface - only its skills roots are encoded (`hooks: null`). `orca` (stablyai/orca) is an agent orchestrator whose `orca.yaml` declares worktree-lifecycle hooks (setup/archive), not agent-event hooks, so it is intentionally not a registry row.
 
 ## Adding a harness
 
