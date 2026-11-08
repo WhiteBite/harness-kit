@@ -81,13 +81,13 @@ const findings = checkInstall(repoRoot, {
 
 - **Реестр как данные.** `registry/harnesses.json` — языконейтральный контракт с JSON Schema: не-JS инструменты читают те же факты, что и JS.
 - **Owner-scoped мержи.** Strip-then-append по sidecar-манифесту ownership с sha256-хешами записей; матчинг по подстроке команды — только миграционный fallback. Чужие байты выживают by construction, а coexistence-спайк на двух владельцев — закоммиченный тест.
-- **Шесть реальных config shapes, один примитив.** nested-hooks (Claude/Codex/Gemini/Qwen), root-events (Devin), versioned-flat (Cursor), versioned-typed (Copilot), flat-matcher (Crush), hooks-array (Kiro).
+- **Шесть реальных config shapes, один примитив.** nested-hooks (Claude, Codex, Gemini, Qwen, Goose, OpenHands, Continue, Junie), root-events (Devin), versioned-flat (Cursor), versioned-typed (Copilot), flat-matcher (Crush), hooks-array (Kiro).
 - **Нулевые зависимости, вендорное потребление.** Никаких рантайм-зависимостей и никакого npx в горячих путях; потребители вендорят кит и сверяют его по детерминированному hash-манифесту.
 - **Проверено саботажем.** `npm run self-test` валидирует реестр, падает на sabotage-фикстурах, терпит неизвестные ключи (forward compatibility) и прогоняет coexistence двух владельцев по каждой mergeable-строке реестра.
 
 ## Статус
 
-Фаза 3: doctor-агрегация — находки `checkInstall` по hook-config и marker-block поверхностям, read-side маркера, резолвер git `core.hooksPath`, извлечение CLI-пуха силами вызывающего — поверх канонического реестра фазы 2 (14 строк harness'ов, сведённых из трёх независимых реализаций), примитивов merge/ownership/atomic/template/symlink/marker-block/drift, тест-сьюта, self-test и hash-манифеста. Принят семейными инструментами: repo-aeo (symlink-и скиллов), stop-ai-slop (хуки, правила, pre-commit) и dejavu-gates (мержи, шаблоны, дрейф) вендорят кит за sha256 sync-check и golden byte-diff гейтом; см. [docs/consumption.md](docs/consumption.md) и [docs/coexistence.md](docs/coexistence.md).
+Фаза 3: doctor-агрегация — находки `checkInstall` по hook-config и marker-block поверхностям, read-side маркера, резолвер git `core.hooksPath`, извлечение CLI-пуха силами вызывающего — поверх канонического реестра фазы 2 (29 строк, сведённых из трёх независимых реализаций), примитивов merge/ownership/atomic/template/symlink/marker-block/drift, тест-сьюта, self-test и hash-манифеста. Принят семейными инструментами: repo-aeo (symlink-и скиллов), stop-ai-slop (хуки, правила, pre-commit) и dejavu-gates (мержи, шаблоны, дрейф) вендорят кит за sha256 sync-check и golden byte-diff гейтом; см. [docs/consumption.md](docs/consumption.md) и [docs/coexistence.md](docs/coexistence.md).
 
 ## Лицензия
 

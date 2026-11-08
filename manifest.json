@@ -15,7 +15,7 @@
     "src/ownership.mjs": "1afd9f350fc28c6850d8602b895827205ee736317d2ff3f84af1f0e981b3a5e0",
     "src/registry.mjs": "549c9e90e26ab10809f802d29da6cda2d977be423372c34b2766512da4c071e1",
     "src/shapes.mjs": "3a5b6eac457d1133997639e5caa7ac4a679dd25da6e33f9563449a03fa6934dc",
-    "src/symlink.mjs": "0ea41d49da241c050ee3c895e88ed8d64ff05dcc495686c591e13e95b0105425",
+    "src/symlink.mjs": "e388b29bed6b4e48eb1f7e9ec177c0e6e72683296f57545780d225f12b8aaf3e",
     "src/template.mjs": "a9293511c66420789e1762c3e083deb8fd195e167e3cd7b3c7ad1d20a26c8af5",
     "src/toml.mjs": "20dac33ad24f2185a975adacd0b5a5e57f718499abd84d007f03b908ba4552d7",
     "registry/CHANGELOG.md": "64c7a73d4e40e92f9a5721ce24fd5f644f976549e80386af6c90dbbf9e4650cc",

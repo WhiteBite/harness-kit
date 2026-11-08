@@ -2,7 +2,7 @@
 import { existsSync, lstatSync, mkdirSync, readlinkSync, rmSync, symlinkSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
-/** Windows junctions report rooted targets with a device prefix (\\?\C:\, \\?\UNC\server\share, \??\C:\); strip it before comparing. */
+/** Windows junctions report rooted targets with an extended-length, UNC or object-manager prefix; strip it before comparing (concrete forms are pinned in test/symlink.test.mjs). */
 export function normalizeLinkTarget(raw) {
   const value = String(raw);
   if (value.startsWith('\\\\?\\UNC\\')) return `\\\\${value.slice(8)}`;

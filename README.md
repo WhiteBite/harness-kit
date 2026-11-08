@@ -83,13 +83,13 @@ const findings = checkInstall(repoRoot, {
 
 - **Registry as data.** `registry/harnesses.json` is a language-neutral contract with a JSON Schema: non-JS tools read the same facts JS tools do.
 - **Owner-scoped merges.** Strip-then-append keyed by an ownership sidecar with sha256 entry hashes; command-substring matching is only a migration fallback. Foreign bytes survive by construction, and the two-owner coexistence spike is a committed test.
-- **Six real config shapes, one primitive.** nested-hooks (Claude/Codex/Gemini/Qwen), root-events (Devin), versioned-flat (Cursor), versioned-typed (Copilot), flat-matcher (Crush), hooks-array (Kiro).
+- **Six real config shapes, one primitive.** nested-hooks (Claude, Codex, Gemini, Qwen, Goose, OpenHands, Continue, Junie), root-events (Devin), versioned-flat (Cursor), versioned-typed (Copilot), flat-matcher (Crush), hooks-array (Kiro).
 - **Zero dependencies, vendored consumption.** No runtime dependency and no npx in hot paths; consumers vendor the kit and verify it against a deterministic hash manifest.
 - **Sabotage-tested.** `npm run self-test` validates the registry, fails on sabotage fixtures, tolerates unknown keys (forward compatibility) and sweeps two-owner coexistence across every mergeable registry row.
 
 ## Status
 
-Phase 3: doctor aggregation — `checkInstall` findings over hook-config and marker-block surfaces, marker read-side, the git `core.hooksPath` resolver, caller-supplied CLI-path extraction — atop Phase 2's canonical registry (14 harness rows reconciled from three independent implementations), merge/ownership/atomic/template/symlink/marker-block/drift primitives, test suite, self-test and hash manifest. Adopted by the family tools — repo-aeo (skill symlinks), stop-ai-slop (hooks, rules, pre-commit) and dejavu-gates (merges, templates, drift) each vendor the kit behind a sha256 sync-check and a golden byte-diff gate; see [docs/consumption.md](docs/consumption.md) and [docs/coexistence.md](docs/coexistence.md).
+Phase 3: doctor aggregation — `checkInstall` findings over hook-config and marker-block surfaces, marker read-side, the git `core.hooksPath` resolver, caller-supplied CLI-path extraction — atop Phase 2's canonical registry (29 harness rows reconciled from three independent implementations), merge/ownership/atomic/template/symlink/marker-block/drift primitives, test suite, self-test and hash manifest. Adopted by the family tools — repo-aeo (skill symlinks), stop-ai-slop (hooks, rules, pre-commit) and dejavu-gates (merges, templates, drift) each vendor the kit behind a sha256 sync-check and a golden byte-diff gate; see [docs/consumption.md](docs/consumption.md) and [docs/coexistence.md](docs/coexistence.md).
 
 ## License
 

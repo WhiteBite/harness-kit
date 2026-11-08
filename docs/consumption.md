@@ -33,7 +33,7 @@ Re-copy the four vendored items from the kit version being adopted, in one commi
 
 ## 4. Files left in the target tree
 
-`writeJsonAtomic` rotates a `<file>.bak` copy of every existing config it replaces, and `recordOwnership` writes `.harness-kit/ownership.json` at the target root. Consumers decide gitignore policy for `*.bak` and `.harness-kit/`.
+`writeJsonAtomic` rotates a `<file>.harness-kit.bak` copy of every existing config it replaces, and `recordOwnership` writes `.harness-kit/ownership.json` at the target root. Consumers decide gitignore policy for `*.harness-kit.bak` and `.harness-kit/`.
 
 ## Migration rules (strangler)
 

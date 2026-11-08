@@ -23,19 +23,30 @@ npm run release       # sync + commit + tag the current (or bumped) version; pus
 | `registry/harnesses.json` | canonical harness facts: config paths, shapes, events, timeout units, env overrides |
 | `registry/harnesses.schema.json` | language-neutral validation contract (unknown keys tolerated) |
 | `registry/CHANGELOG.md` | registryVersion history |
-| `src/merge.mjs` | owner-scoped strip-then-append across all six config shapes |
-| `src/ownership.mjs` | sidecar manifest: locator + sha256 per owned entry |
-| `src/atomic.mjs` | validate-then-rotate writes, symlink refusal, Windows rename retries |
+| `src/index.mjs` | public export barrel consumed via package exports |
+| `src/shapes.mjs` | single source of the six hook-config shapes |
+| `src/merge.mjs` | owner-scoped strip-then-append across all six shapes + `stripOwned`/`locatorFor` sidecar wiring |
+| `src/ownership.mjs` | sidecar manifest: locator + sha256 per owned entry, `clearOwnership` uninstall |
+| `src/atomic.mjs` | validate-then-rotate writes, symlink refusal (incl. backup path), Windows rename retries |
 | `src/template.mjs` | `{{VAR}}` substitution with full JSON-string escaping |
 | `src/symlink.mjs` | skill-dir linking with absent/linked/foreign-link/manual classification |
 | `src/registry.mjs` | loader + zero-dep structural validator |
-| `scripts/selftest.mjs` | sabotage-checked invariants + coexistence sweep |
+| `src/mcp.mjs` | owner-scoped MCP server-map merge for JSON configs |
+| `src/jsonc.mjs` | JSONC scanner + comment-preserving container splice (`write: "merge-text"`) |
+| `src/toml.mjs` | TOML scanner + comment-preserving table splice (`write: "merge-text"`) |
+| `src/marker.mjs` | marker-block writers + shell-block reader |
+| `src/drift.mjs` | hook-command drift classification (broken/missing/stale/ok) |
+| `src/doctor.mjs` | `checkInstall` findings aggregation + git `core.hooksPath` resolver |
+| `src/manifest.mjs` | deterministic hash-manifest primitives shared by the CLI, scripts and tests |
+| `bin/harness-kit.mjs` | zero-dep CLI: `versions`/`vendor`/`check`/`diff`/`update` |
+| `scripts/selftest.mjs` | sabotage-checked invariants + coexistence sweep + docs-table gates |
 | `scripts/manifest.mjs` | deterministic hash manifest for vendored sync-checks |
 | `scripts/version.mjs` | single-source version: sync/check/bump/tag/release |
 | `scripts/release-check.mjs` | release-integrity gate: tag==version + packed-artifact vendor smoke |
 | `docs/consumption.md` | vendoring + sync-check procedure |
 | `docs/coexistence.md` | multi-tool ownership convention |
 | `docs/dialects.md` | shape catalog + how to add a harness |
+| `docs/boundaries.md` | product scope + known limitations |
 
 ## Do / Don't
 

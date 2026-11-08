@@ -20,11 +20,13 @@ harness-kit is the **install substrate**: it answers "how do I write byte X into
 | Plugin-manifest read/write | Manifests are static repo artifacts; no runtime consumer. |
 | Runtime harness behavior | The kit never runs inside a harness; install/build-time only. |
 | Registry server / HTTP API | Static JSON pinned by tag is enough and cacheable. |
-| Parsing `notes` fields | Human-only by contract (registry/AGENTS.md). |
+| Parsing `notes` fields | Human-only by contract (AGENTS.md). |
 
 ## Known limitations
 
-- `mergeHooks` strips by the caller's `isMine(command)` predicate. A SUBSTRING predicate can delete a foreign entry whose command merely contains the substring; use exact command equality or the ownership sidecar (`readOwnership`/`entryMatchesHash`). The kit cannot tell a substring predicate from an exact one.
+- `mergeHooks` strips by the caller's `isMine(command)` predicate. A SUBSTRING predicate can delete a foreign entry whose command merely contains the substring; use exact command equality or the ownership sidecar (`readOwnership`/`stripOwned`). The kit cannot tell a substring predicate from an exact one.
+- Read-merge-write is not one transaction and the kit ships no lock: two installers merging the same config concurrently can silently lose one tool's entries. `writeTextAtomic` keeps the file uncorrupted mid-crash, but install flows must be serialized (or reconciled) by the consumer.
+- `mergeJsoncContainer` / `mergeTomlTable` strip an own member together with a comment that leans directly on it (between it and the previous entry); comments after the last kept member survive. Locators in the ownership sidecar are positional: another owner's install/uninstall shifts indices - see docs/coexistence.md rule 2.
 - For `root-events`, stripping runs over every top-level array, so a foreign non-event top-level array whose entries carry a matching command can be stripped (rare; restricting to declared `events` is a future option).
 - `canonicalJson` recurses per nesting level, so a pathologically deep config can overflow the stack (install-time, and only on untrusted input).
 - `resolveHooksDir` returns git's `core.hooksPath` unvalidated; the resulting write is still guarded by the symlink-component refusal, but the path is not contained to the repo.

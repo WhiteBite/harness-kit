@@ -1,16 +1,13 @@
 #!/usr/bin/env node
-/** harness-kit self-test: registry validation, sabotage fixtures, forward compatibility, and a two-owner coexistence sweep over every mergeable registry row. */
-import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+/** harness-kit self-test: registry validation, sabotage fixtures, forward compatibility, a two-owner coexistence sweep over every mergeable registry row, and docs-table parity gates. */
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { loadRegistry, validateRegistry } from '../src/registry.mjs';
 import { mergeHooks } from '../src/merge.mjs';
 import { mergeMcpServers } from '../src/mcp.mjs';
 import { mergeJsoncContainer, parseJsonc } from '../src/jsonc.mjs';
 import { mergeTomlTable } from '../src/toml.mjs';
-import { writeMarkerBlock } from '../src/marker.mjs';
-import { checkDrift, collectCommands, extractCliPath } from '../src/drift.mjs';
-import { checkInstall } from '../src/doctor.mjs';
+import { collectCommands } from '../src/drift.mjs';
 
 let failures = 0;
 
@@ -62,6 +59,7 @@ function emptyTemplateFor(shape) {
 }
 
 const registry = loadRegistry();
+const dialects = readFileSync('docs/dialects.md', 'utf8');
 
 check('registry passes structural validation', () => {
   const problems = validateRegistry(registry);
@@ -71,7 +69,7 @@ check('registry passes structural validation', () => {
 check('registry shape and coverage invariants', () => {
   assert(registry.schemaVersion === 1, 'schemaVersion must stay 1');
   assert(/^\d+\.\d+\.\d+$/.test(registry.registryVersion), 'registryVersion must be semver');
-  assert(Object.keys(registry.harnesses).length >= 10, 'registry lost harness rows');
+  assert(Object.keys(registry.harnesses).length === 29, 'registry row count changed - update this exact invariant when adding or removing a row');
   for (const [id, entry] of Object.entries(registry.harnesses)) {
     const hooks = entry.hooks;
     if (!hooks) continue;
@@ -87,25 +85,29 @@ check('registry shape and coverage invariants', () => {
 check('sabotage: invalid status is caught', () => {
   const bad = clone(registry);
   bad.harnesses.claude.status = 'yolo';
-  assert(validateRegistry(bad).length > 0, 'invalid status must be rejected');
+  const problems = validateRegistry(bad);
+  assert(problems.some((problem) => problem.includes('claude: status must be one of')), `expected a status problem, got: ${problems.join('; ')}`);
 });
 
 check('sabotage: merge without shape is caught', () => {
   const bad = clone(registry);
   delete bad.harnesses.devin.hooks.shape;
-  assert(validateRegistry(bad).length > 0, 'write=merge without shape must be rejected');
+  const problems = validateRegistry(bad);
+  assert(problems.some((problem) => problem.includes('devin: hooks.shape is required')), `expected a shape problem, got: ${problems.join('; ')}`);
 });
 
 check('sabotage: unknown write mode is caught', () => {
   const bad = clone(registry);
   bad.harnesses.cursor.hooks.write = 'sideways';
-  assert(validateRegistry(bad).length > 0, 'unknown write mode must be rejected');
+  const problems = validateRegistry(bad);
+  assert(problems.some((problem) => problem.includes('cursor: hooks.write must be one of')), `expected a write problem, got: ${problems.join('; ')}`);
 });
 
 check('sabotage: rule without format is caught', () => {
   const bad = clone(registry);
   delete bad.harnesses.windsurf.rules[0].format;
-  assert(validateRegistry(bad).length > 0, 'rule without format must be rejected');
+  const problems = validateRegistry(bad);
+  assert(problems.some((problem) => problem.includes('windsurf: rule.format must be one of')), `expected a rule format problem, got: ${problems.join('; ')}`);
 });
 
 check('forward compatibility: unknown keys and new harnesses are tolerated', () => {
@@ -132,31 +134,35 @@ check('mcp: every mcp row declares config, format and container', () => {
     if (mcp.write === 'merge-text') assert(mcp.format === 'jsonc' || mcp.format === 'toml', `${id}: mcp write=merge-text requires jsonc or toml`);
     swept += 1;
   }
-  assert(swept >= 12, `expected at least 12 mcp rows, swept ${swept}`);
+  assert(swept === 18, `expected exactly 18 mcp rows, swept ${swept}`);
 });
 
 check('sabotage: invalid mcp format is caught', () => {
   const bad = clone(registry);
   bad.harnesses.claude.mcp.format = 'yaml';
-  assert(validateRegistry(bad).length > 0, 'invalid mcp.format must be rejected');
+  const problems = validateRegistry(bad);
+  assert(problems.some((problem) => problem.includes('claude: mcp.format must be one of')), `expected an mcp format problem, got: ${problems.join('; ')}`);
 });
 
 check('sabotage: mcp without container is caught', () => {
   const bad = clone(registry);
   delete bad.harnesses.cursor.mcp.container;
-  assert(validateRegistry(bad).length > 0, 'mcp.container must be required');
+  const problems = validateRegistry(bad);
+  assert(problems.some((problem) => problem.includes('cursor: mcp.container is required')), `expected a container problem, got: ${problems.join('; ')}`);
 });
 
 check('sabotage: an unknown mcp write mode is caught', () => {
   const bad = clone(registry);
   bad.harnesses.claude.mcp.write = 'sideways';
-  assert(validateRegistry(bad).length > 0, 'unknown mcp.write must be rejected');
+  const problems = validateRegistry(bad);
+  assert(problems.some((problem) => problem.includes('claude: mcp.write must be one of')), `expected an mcp write problem, got: ${problems.join('; ')}`);
 });
 
 check('sabotage: mcp write=merge with a non-json format is caught', () => {
   const bad = clone(registry);
   bad.harnesses.claude.mcp.format = 'toml';
-  assert(validateRegistry(bad).length > 0, 'mcp write=merge must require json format');
+  const problems = validateRegistry(bad);
+  assert(problems.some((problem) => problem.includes('claude: mcp write=merge requires json format')), `expected an mcp merge-format problem, got: ${problems.join('; ')}`);
 });
 
 check('mcp coexistence sweep: two owners merge server maps, reinstall byte-identical, uninstall strips only own', () => {
@@ -183,7 +189,7 @@ check('mcp coexistence sweep: two owners merge server maps, reinstall byte-ident
     assert(uninstalled[container].b, `${id}: uninstall removed a foreign server`);
     swept += 1;
   }
-  assert(swept >= 6, `expected at least 6 mergeable mcp rows, swept ${swept}`);
+  assert(swept === 8, `expected exactly 8 mergeable mcp rows, swept ${swept}`);
 });
 
 check('mcp merge-text sweep: two owners splice JSONC/TOML, reinstall stable, uninstall strips only own', () => {
@@ -215,7 +221,7 @@ check('mcp merge-text sweep: two owners splice JSONC/TOML, reinstall stable, uni
     assert(has(uninstalled.text, 'b'), `${id}: uninstall removed a foreign server`);
     swept += 1;
   }
-  assert(swept >= 3, `expected at least 3 merge-text rows, swept ${swept}`);
+  assert(swept === 3, `expected exactly 3 merge-text rows, swept ${swept}`);
 });
 
 check('provenance: every stable row declares verified{against, at}', () => {
@@ -225,19 +231,40 @@ check('provenance: every stable row declares verified{against, at}', () => {
     assert(entry.verified && entry.verified.against && /^\d{4}-\d{2}-\d{2}$/.test(entry.verified.at), `${id}: stable row must carry verified provenance`);
     swept += 1;
   }
-  assert(swept >= 8, `expected several stable rows, swept ${swept}`);
+  assert(swept === 11, `expected exactly 11 stable rows, swept ${swept}`);
+});
+
+check('docs: the dialects MCP table covers every registry mcp row', () => {
+  const listed = new Set([...dialects.matchAll(/^\|\s*([a-z][a-z0-9-]*)\s*\|/gm)].map((match) => match[1]));
+  const missing = Object.entries(registry.harnesses).filter(([, entry]) => entry.mcp).map(([id]) => id).filter((id) => !listed.has(id));
+  assert(missing.length === 0, `docs/dialects.md MCP table lags the registry: ${missing.join(', ')}`);
+});
+
+check('docs: the dialects shape table lists every harness declaring a shape', () => {
+  const listed = new Set(
+    [...dialects.matchAll(/^\| `([a-z-]+)` \|[^|]+\|[^|]+\|([^|]+)\|/gm)]
+      .flatMap((match) => match[2].split(','))
+      .map((name) => name.trim()),
+  );
+  const missing = Object.entries(registry.harnesses)
+    .filter(([, entry]) => entry.hooks && entry.hooks.shape)
+    .map(([id]) => id)
+    .filter((id) => !listed.has(id));
+  assert(missing.length === 0, `docs/dialects.md shape table lags the registry: ${missing.join(', ')}`);
 });
 
 check('sabotage: a stable row without verified is caught', () => {
   const bad = clone(registry);
   delete bad.harnesses.claude.verified;
-  assert(validateRegistry(bad).length > 0, 'a stable row without verified must be rejected');
+  const problems = validateRegistry(bad);
+  assert(problems.some((problem) => problem.includes('claude: a stable row requires verified provenance')), `expected a provenance problem, got: ${problems.join('; ')}`);
 });
 
 check('sabotage: a malformed verified date is caught', () => {
   const bad = clone(registry);
   bad.harnesses.codex.verified.at = '03-10-2026';
-  assert(validateRegistry(bad).length > 0, 'a non-ISO verified.at must be rejected');
+  const problems = validateRegistry(bad);
+  assert(problems.some((problem) => problem.includes('codex: verified must be')), `expected a verified problem, got: ${problems.join('; ')}`);
 });
 
 check('coexistence sweep: two owners merge, reinstall byte-identical, uninstall strips only own', () => {
@@ -262,7 +289,7 @@ check('coexistence sweep: two owners merge, reinstall byte-identical, uninstall 
     assert(remaining.includes(THEIRS), `${id}: uninstall removed a foreign entry`);
     swept += 1;
   }
-  assert(swept >= 5, `expected at least 5 mergeable harness rows, swept ${swept}`);
+  assert(swept === 10, `expected exactly 10 mergeable hook rows, swept ${swept}`);
 });
 
 check('coexistence sweep: a non-array foreign event value survives verbatim', () => {
@@ -281,79 +308,10 @@ check('coexistence sweep: a non-array foreign event value survives verbatim', ()
     assert(JSON.stringify(survived) === JSON.stringify(foreign), `${id}: non-array foreign event value must survive verbatim`);
     swept += 1;
   }
-  assert(swept >= 5, `expected at least 5 event-map merge rows, swept ${swept}`);
+  assert(swept === 10, `expected exactly 10 event-map merge rows, swept ${swept}`);
 });
 
-function withTemp(fn) {
-  const dir = mkdtempSync(join(tmpdir(), 'hk-selftest-'));
-  try {
-    fn(dir);
-  } finally {
-    rmSync(dir, { recursive: true, force: true });
-  }
-}
-
-check('sabotage: marker writer rejects a variant without its discriminator', () => {
-  withTemp((dir) => {
-    let message = null;
-    try {
-      writeMarkerBlock(join(dir, 'x'), '# >>> id >>>\n', { variant: 'shell-block' });
-    } catch (error) {
-      message = error && error.message;
-    }
-    assert(message !== null && /id/.test(message), 'shell-block without id must be rejected');
-  });
-});
-
-check('sabotage: marker writer rejects an unknown variant', () => {
-  withTemp((dir) => {
-    let message = null;
-    try {
-      writeMarkerBlock(join(dir, 'x'), 'x', { variant: 'sideways' });
-    } catch (error) {
-      message = error && error.message;
-    }
-    assert(message !== null && /variant/.test(message), 'unknown marker variant must be rejected');
-  });
-});
-
-check('drift: collectCommands and extractCliPath read every merge shape', () => {
-  assert(collectCommands({ hooks: { PreToolUse: [{ command: MINE }] } }, { shape: 'nested-hooks' }).includes(MINE), 'nested leaf command must be collected');
-  assert(collectCommands({ PreToolUse: [{ hooks: [{ command: MINE }] }] }, { shape: 'root-events' }).includes(MINE), 'root-events command must be collected');
-  assert(extractCliPath('bun "/x/src/cli.ts" pre') === '/x/src/cli.ts', 'extractCliPath must parse a quoted .ts token');
-});
-
-check('sabotage: drift statuses stay inside the vocabulary', () => {
-  const vocabulary = new Set(['broken', 'missing', 'stale', 'ok']);
-  const identify = (command) => typeof command === 'string' && command.includes('--harness x');
-  const configFor = (command) => ({ hooks: { PreToolUse: [{ hooks: [{ command }] }] } });
-  const scenarios = [
-    checkDrift({ parseError: true }, { shape: 'nested-hooks', identify, pathExists: () => true }),
-    checkDrift({ config: configFor('node /foreign.js') }, { shape: 'nested-hooks', identify, pathExists: () => true }),
-    checkDrift({ config: configFor('bun "/gone/cli.ts" pre --harness x') }, { shape: 'nested-hooks', identify, pathExists: () => false }),
-    checkDrift({ config: configFor('bun "/here/cli.ts" pre --harness x') }, { shape: 'nested-hooks', identify, pathExists: () => true }),
-  ];
-  for (const result of scenarios) assert(vocabulary.has(result.status), `unexpected drift status ${JSON.stringify(result.status)}`);
-  assert(scenarios.map((result) => result.status).sort().join(',') === 'broken,missing,ok,stale', 'all four drift statuses must be produced');
-});
-
-check('sabotage: checkInstall statuses stay inside the drift vocabulary', () => {
-  withTemp((dir) => {
-    const vocabulary = new Set(['broken', 'missing', 'stale', 'ok']);
-    writeFileSync(join(dir, 'hooks.json'), JSON.stringify({ hooks: { PreToolUse: [{ hooks: [{ command: MINE }, { command: THEIRS }] }] } }));
-    const surfaces = [
-      { id: 'unknown-kind', kind: 'surprise', path: 'x' },
-      { id: 'absent', kind: 'hook-config', path: 'absent.json', shape: 'nested-hooks', identify: () => true },
-      { id: 'mine', kind: 'hook-config', path: 'hooks.json', shape: 'nested-hooks', identify: isMine },
-      { id: 'theirs', kind: 'hook-config', path: 'hooks.json', shape: 'nested-hooks', identify: (command) => typeof command === 'string' && command.includes('--harness x') },
-    ];
-    const findings = checkInstall(dir, { surfaces, pathExists: () => true });
-    for (const result of findings) assert(vocabulary.has(result.status), `unexpected checkInstall status ${JSON.stringify(result.status)}`);
-    assert(findings.map((result) => result.status).join(',') === 'broken,missing,stale,ok', `expected the full vocabulary in order, got ${findings.map((result) => result.status).join(',')}`);
-  });
-});
-
-check('repo hygiene: no drive-letter paths in src, registry, types, scripts, docs', () => {
+check('repo hygiene: no drive-letter paths in src, registry, types, scripts, bin, docs', () => {
   // test/ is out of the scan: its fixtures legitimately carry Windows paths for parser coverage
   const DRIVE_PATH = /[A-Za-z]:\\/;
   const offenders = [];
@@ -364,7 +322,7 @@ check('repo hygiene: no drive-letter paths in src, registry, types, scripts, doc
       else if (DRIVE_PATH.test(readFileSync(full, 'utf8'))) offenders.push(relative('.', full).split('\\').join('/'));
     }
   };
-  for (const root of ['src', 'registry', 'types', 'scripts', 'docs']) walk(root);
+  for (const root of ['src', 'registry', 'types', 'scripts', 'bin', 'docs']) walk(root);
   assert(offenders.length === 0, `machine-local paths leaked: ${offenders.join(', ')}`);
 });
 
