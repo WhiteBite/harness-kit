@@ -2,6 +2,10 @@
 
 Keep-a-changelog format. `registryVersion` mirrors the package `version`: there is one version everywhere (`npm run version:sync` sets it); historical registry-only versions live in `registry/CHANGELOG.md`.
 
+## 1.10.4
+
+- Release-chain hardening: `npm run release` stages every version surface (registry included), refuses a dirty `src`/`registry`/`types` tree, refuses to move an existing tag, and pushes branch and tag together; `docs/jsonld.jsonld` is version-synced in place instead of re-serialized; `publish.yml` runs `version:check` and compares the exact version before skipping.
+
 ## 0.11.0
 
 - Comment-preserving MCP writes for non-JSON configs: `mergeJsoncContainer` (JSONC) and `mergeTomlTable` (TOML) splice an owner-scoped server map into text, preserving every foreign byte and comment and refusing any construct outside their supported subset. New `mcp.write: "merge-text"`; opencode and amp (jsonc) and codex (toml) move off `print-only`.
