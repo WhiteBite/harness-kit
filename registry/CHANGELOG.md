@@ -4,6 +4,13 @@ Format: keep-a-changelog. From package 0.10.0, `registryVersion` mirrors the pac
 MAJOR removes/renames keys or changes their meaning (a structural break that breaks consumer code), MINOR adds harnesses, fields or additive blocks and also covers fact VALUE changes (a moved path or corrected container - consumer code does not change, the lockfile/`diff` surfaces it), PATCH is notes and typos.
 Keys are never deleted - they are deprecated in place (forward compatibility for vendored consumers).
 
+## 2.0.0
+
+No registry STRUCTURAL break rides this version - the changes below are fact corrections (MINOR-class); `registryVersion` mirrors the package major per the one-version policy.
+- Fact corrections: amp's note no longer claims print-only (the row is `merge-text`); zcode's `hooks.shape` is removed (its `hooks.events.<Event>` envelope has no kit shape; the row stays print-only); windsurf drops the unverified Windows path-variant note in favor of the canonical codeium path on every platform; `conventions.mcpPolicy` now says non-JSON formats either splice comment-preserving owner-scoped text (`merge-text`) or stay print-only.
+- Schema: the cross-field rules are encoded (write=merge requires `shape`; a `stable` row requires `verified`; mcp write=merge requires json, write=merge-text requires jsonc/toml) and top-level `envOverrides` is declared (used by the hooks-null rows oh-my-pi, pi, kimi-code).
+- Backfill: registry 0.10.0 was never recorded here; it enabled `merge` for the six JSON env-interpolated mcp rows (claude, gemini, cursor, windsurf, kiro, factory) and grew the registry by 11 experimental rows (goose, hermes, openhands, continue, junie, oh-my-pi, pi, kimi-code, amp, zcode, deepseek) - see the root CHANGELOG.
+
 ## 0.11.0
 
 - Enable comment-preserving MCP writes for the JSONC/TOML rows: new `mcp.write: "merge-text"`, and opencode, amp (jsonc) and codex (toml) move from `print-only` to it. `merge` stays JSON-only; `merge-text` requires a jsonc or toml format.

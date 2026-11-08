@@ -1,7 +1,7 @@
 {
   "$schema": "./harnesses.schema.json",
   "schemaVersion": 1,
-  "registryVersion": "1.10.5",
+  "registryVersion": "2.0.0",
   "conventions": {
     "ownership": {
       "sidecar": ".harness-kit/ownership.json",

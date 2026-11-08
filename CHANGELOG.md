@@ -2,6 +2,17 @@
 
 Keep-a-changelog format. `registryVersion` mirrors the package `version`: there is one version everywhere (`npm run version:sync` sets it); historical registry-only versions live in `registry/CHANGELOG.md`.
 
+## 2.0.0
+
+- BREAKING: `linkState` arguments are now `(source, target)`, aligned with `linkDir`/`unlinkDir`.
+- Ownership is wired into merges: new `stripOwned` strips by sidecar hash with an optional substring fallback (a hash mismatch alone never deletes), `locatorFor` centralizes the per-shape locator knowledge, `clearOwnership` completes the uninstall lifecycle, and `recordOwnership` accumulates key-verified records per (owner, file).
+- Hardening: `renderTemplate` substitutes only own vars (prototype-chain names like `{{constructor}}` stay literal); the atomic writer fsyncs the temp before rename and refuses a symlinked `.harness-kit.bak` target; BOM'd configs parse instead of aborting as broken JSON; marker-block writes go through the atomic temp-and-rename writer; junction target normalization covers the UNC and object-manager prefix forms; `linkDir` reports a dangling own link instead of healthy.
+- `mergeJsoncContainer` keeps CRLF files uniform - inserted multi-line values no longer leak bare LF.
+- `extractCliPath` no longer truncates `.tsx`/`.tsbuildinfo` into phantom `.ts` paths; the unused `isMine` option is gone from `CheckDriftOpts`.
+- CLI/release: `vendor` refuses to operate on the kit tree or an ancestor of it and copies the manifest first; `release` commits only the version surfaces, never a stranger's staged files; the npm package resolves its TS types through the `exports` map and ships the README image.
+- Registry facts reconciled with the data (amp is merge-text, zcode's phantom shape dropped, windsurf's unverified Windows path note removed, `conventions.mcpPolicy` matches the merge-text reality); the schema now encodes the cross-field rules (merge requires shape, stable requires `verified`, mcp write/format pairs) and declares top-level `envOverrides`.
+- Docs are gated instead of trusted: self-test checks the dialects MCP and shape tables against the registry, pins exact row counts, and asserts the precise validator message per sabotage; README/AGENTS/dialects/boundaries/consumption/SECURITY/MIGRATIONS refreshed; CI runs the suite on windows-latest as well.
+
 ## 1.10.5
 
 - `version:tag` now asserts the tagged commit carries the version; prereleases publish under the `next` dist-tag, a `workflow_dispatch` run only dry-runs, and `hasSection` no longer matches a prerelease prefix.
