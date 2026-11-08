@@ -57,7 +57,8 @@ export function surfaceProblems(root) {
   if (citationVersion !== version) problems.push(`CITATION.cff version ${citationVersion} != package ${version} (run npm run version:sync)`);
   if (jsonld !== version) problems.push(`jsonld softwareVersion ${jsonld} != package ${version} (run npm run version:sync)`);
   if (manifest.kitVersion !== version) problems.push(`manifest kitVersion ${manifest.kitVersion} != package ${version} (run npm run version:sync)`);
-  if (manifest.registryVersion !== registry.registryVersion) problems.push(`manifest registryVersion ${manifest.registryVersion} != registry ${registry.registryVersion} (run npm run manifest)`);
+  if (registry.registryVersion !== version) problems.push(`registry registryVersion ${registry.registryVersion} != package ${version} (run npm run version:sync)`);
+  if (manifest.registryVersion !== version) problems.push(`manifest registryVersion ${manifest.registryVersion} != package ${version} (run npm run version:sync)`);
   if (!hasSection(readText(root, CHANGELOG), version)) problems.push(`CHANGELOG.md has no "## ${version}" section`);
   return problems;
 }
@@ -82,9 +83,16 @@ export function applySync(root) {
     changed.push(JSONLD);
   }
 
+  const registryPath = join(root, REGISTRY);
+  const registry = JSON.parse(readFileSync(registryPath, 'utf8'));
+  if (registry.registryVersion !== version) {
+    registry.registryVersion = version;
+    writeJson(root, REGISTRY, registry);
+    changed.push(REGISTRY);
+  }
+
   const manifestPath = join(root, MANIFEST);
-  const registry = readJson(root, REGISTRY);
-  const manifest = { kit: readJson(root, PKG).name, kitVersion: version, registryVersion: registry.registryVersion, files: computeManifest(root) };
+  const manifest = { kit: readJson(root, PKG).name, kitVersion: version, registryVersion: version, files: computeManifest(root) };
   const serialized = `${JSON.stringify(manifest, null, 2)}\n`;
   if (!existsSync(manifestPath) || readFileSync(manifestPath, 'utf8') !== serialized) {
     writeFileSync(manifestPath, serialized, 'utf8');

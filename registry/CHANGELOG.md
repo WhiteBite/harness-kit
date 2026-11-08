@@ -1,6 +1,6 @@
 # Registry changelog
 
-Format: keep-a-changelog. `registryVersion` follows semver:
+Format: keep-a-changelog. From package 0.10.0, `registryVersion` mirrors the package `version` (one version everywhere; `version:sync` sets it) and new entries are keyed by the package version. The semver contract below describes the historical registry-only versions (through 0.6.0):
 MAJOR removes/renames keys or changes their meaning (a structural break that breaks consumer code), MINOR adds harnesses, fields or additive blocks and also covers fact VALUE changes (a moved path or corrected container - consumer code does not change, the lockfile/`diff` surfaces it), PATCH is notes and typos.
 Keys are never deleted - they are deprecated in place (forward compatibility for vendored consumers).
 

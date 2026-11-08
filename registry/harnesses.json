@@ -1,7 +1,7 @@
 {
   "$schema": "./harnesses.schema.json",
   "schemaVersion": 1,
-  "registryVersion": "0.6.0",
+  "registryVersion": "0.10.0",
   "conventions": {
     "ownership": {
       "sidecar": ".harness-kit/ownership.json",
@@ -23,17 +23,40 @@
     "claude": {
       "name": "Claude Code",
       "status": "stable",
-      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
+      "verified": {
+        "against": "observed in at least one family installer",
+        "at": "2026-10-03"
+      },
       "hooks": {
-        "config": { "project": ".claude/settings.json", "user": ".claude/settings.json" },
+        "config": {
+          "project": ".claude/settings.json",
+          "user": ".claude/settings.json"
+        },
         "write": "merge",
         "shape": "nested-hooks",
-        "events": ["PreToolUse", "PostToolUse", "PostToolUseFailure", "SessionEnd"],
-        "entryFields": { "type": "command", "timeoutUnit": "seconds" },
+        "events": [
+          "PreToolUse",
+          "PostToolUse",
+          "PostToolUseFailure",
+          "SessionEnd"
+        ],
+        "entryFields": {
+          "type": "command",
+          "timeoutUnit": "seconds"
+        },
         "pluginRootVar": "${CLAUDE_PLUGIN_ROOT}",
-        "envOverrides": { "configDir": "CLAUDE_CONFIG_DIR" }
+        "envOverrides": {
+          "configDir": "CLAUDE_CONFIG_DIR"
+        }
       },
-      "skills": { "global": [".claude/skills"], "project": [".claude/skills"] },
+      "skills": {
+        "global": [
+          ".claude/skills"
+        ],
+        "project": [
+          ".claude/skills"
+        ]
+      },
       "manifests": {
         "plugin": ".claude-plugin/plugin.json",
         "marketplace": ".claude-plugin/marketplace.json",
@@ -41,7 +64,10 @@
       },
       "mcp": {
         "status": "experimental",
-        "config": { "project": ".mcp.json", "user": "~/.claude.json" },
+        "config": {
+          "project": ".mcp.json",
+          "user": "~/.claude.json"
+        },
         "format": "json",
         "container": "mcpServers",
         "urlField": "url",
@@ -57,20 +83,42 @@
     "codex": {
       "name": "Codex CLI",
       "status": "stable",
-      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
+      "verified": {
+        "against": "observed in at least one family installer",
+        "at": "2026-10-03"
+      },
       "hooks": {
-        "config": { "project": ".codex/hooks.json", "user": ".codex/hooks.json" },
+        "config": {
+          "project": ".codex/hooks.json",
+          "user": ".codex/hooks.json"
+        },
         "write": "merge",
         "shape": "nested-hooks",
-        "events": ["PreToolUse", "PostToolUse"],
-        "entryFields": { "type": "command", "timeoutUnit": "seconds" },
-        "envOverrides": { "configDir": "CODEX_HOME" }
+        "events": [
+          "PreToolUse",
+          "PostToolUse"
+        ],
+        "entryFields": {
+          "type": "command",
+          "timeoutUnit": "seconds"
+        },
+        "envOverrides": {
+          "configDir": "CODEX_HOME"
+        }
       },
-      "skills": { "global": [".codex/skills"] },
-      "manifests": { "plugin": ".codex-plugin/plugin.json" },
+      "skills": {
+        "global": [
+          ".codex/skills"
+        ]
+      },
+      "manifests": {
+        "plugin": ".codex-plugin/plugin.json"
+      },
       "mcp": {
         "status": "experimental",
-        "config": { "user": "~/.codex/config.toml" },
+        "config": {
+          "user": "~/.codex/config.toml"
+        },
         "format": "toml",
         "container": "mcp_servers",
         "urlField": "url",
@@ -85,18 +133,35 @@
     "opencode": {
       "name": "OpenCode",
       "status": "stable",
-      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
+      "verified": {
+        "against": "observed in at least one family installer",
+        "at": "2026-10-03"
+      },
       "hooks": null,
       "plugin": {
-        "stubs": { "user": ".config/opencode/plugins/{name}.ts", "project": ".opencode/plugin/{name}.ts" },
+        "stubs": {
+          "user": ".config/opencode/plugins/{name}.ts",
+          "project": ".opencode/plugin/{name}.ts"
+        },
         "dualApi": "default export {id, server, setup}: server() serves 1.18.29+ (v1 tool.execute.before, throw-to-reject), setup() serves 2.x (ctx.tool.hook(\"execute.before\"), the only V2 hook that may reject); keep the legacy named export for older 1.x stubs",
         "stubConvention": "export { default } from \"<absolute path to plugin module>\"; OpenCode labels local plugins by stub file name",
-        "stateDirs": [".opencode/"]
+        "stateDirs": [
+          ".opencode/"
+        ]
       },
-      "skills": { "global": [".config/opencode/skills"], "project": [".opencode/skills"] },
+      "skills": {
+        "global": [
+          ".config/opencode/skills"
+        ],
+        "project": [
+          ".opencode/skills"
+        ]
+      },
       "mcp": {
         "status": "experimental",
-        "config": { "project": "opencode.json" },
+        "config": {
+          "project": "opencode.json"
+        },
         "format": "jsonc",
         "container": "mcp",
         "urlField": "url",
@@ -112,20 +177,43 @@
     "gemini": {
       "name": "Gemini CLI",
       "status": "stable",
-      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
+      "verified": {
+        "against": "observed in at least one family installer",
+        "at": "2026-10-03"
+      },
       "hooks": {
-        "config": { "project": ".gemini/settings.json", "user": ".gemini/settings.json" },
+        "config": {
+          "project": ".gemini/settings.json",
+          "user": ".gemini/settings.json"
+        },
         "write": "merge",
         "shape": "nested-hooks",
-        "events": ["BeforeTool", "AfterTool"],
-        "entryFields": { "type": "command", "timeoutUnit": "milliseconds" },
+        "events": [
+          "BeforeTool",
+          "AfterTool"
+        ],
+        "entryFields": {
+          "type": "command",
+          "timeoutUnit": "milliseconds"
+        },
         "pluginRootVar": "${extensionPath}",
-        "toolNames": ["run_shell_command", "read_file", "write_file", "replace", "glob", "search_file_content"]
+        "toolNames": [
+          "run_shell_command",
+          "read_file",
+          "write_file",
+          "replace",
+          "glob",
+          "search_file_content"
+        ]
       },
-      "manifests": { "extension": "gemini-extension.json" },
+      "manifests": {
+        "extension": "gemini-extension.json"
+      },
       "mcp": {
         "status": "experimental",
-        "config": { "user": "~/.gemini/settings.json" },
+        "config": {
+          "user": "~/.gemini/settings.json"
+        },
         "format": "json",
         "container": "mcpServers",
         "urlField": "httpUrl",
@@ -140,33 +228,76 @@
       "name": "Qwen Code",
       "status": "experimental",
       "hooks": {
-        "config": { "project": ".qwen/settings.json", "user": ".qwen/settings.json" },
+        "config": {
+          "project": ".qwen/settings.json",
+          "user": ".qwen/settings.json"
+        },
         "write": "merge",
         "shape": "nested-hooks",
-        "events": ["PreToolUse", "PostToolUse"],
-        "entryFields": { "type": "command", "timeoutUnit": "milliseconds" },
-        "toolNames": ["write_file", "replace"]
+        "events": [
+          "PreToolUse",
+          "PostToolUse"
+        ],
+        "entryFields": {
+          "type": "command",
+          "timeoutUnit": "milliseconds"
+        },
+        "toolNames": [
+          "write_file",
+          "replace"
+        ]
       },
       "notes": "Gemini CLI fork but event naming observed as PreToolUse (not BeforeTool) in stop-ai-slop snippets - verify empirically before auto-writing; settings.json is user-global, print-only by default."
     },
     "cursor": {
       "name": "Cursor",
       "status": "stable",
-      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
+      "verified": {
+        "against": "observed in at least one family installer",
+        "at": "2026-10-03"
+      },
       "hooks": {
-        "config": { "project": ".cursor/hooks.json", "user": ".cursor/hooks.json" },
+        "config": {
+          "project": ".cursor/hooks.json",
+          "user": ".cursor/hooks.json"
+        },
         "write": "merge",
         "shape": "versioned-flat",
-        "envelope": { "version": 1 },
-        "events": ["beforeShellExecution", "afterShellExecution", "preToolUse", "postToolUse", "postToolUseFailure"],
-        "entryFields": { "type": null, "timeoutUnit": "seconds" },
+        "envelope": {
+          "version": 1
+        },
+        "events": [
+          "beforeShellExecution",
+          "afterShellExecution",
+          "preToolUse",
+          "postToolUse",
+          "postToolUseFailure"
+        ],
+        "entryFields": {
+          "type": null,
+          "timeoutUnit": "seconds"
+        },
         "pluginRootVar": "${CURSOR_PLUGIN_ROOT}"
       },
-      "rules": [{ "path": ".cursor/rules/{id}.mdc", "format": "mdc", "frontmatter": ["description", "globs", "alwaysApply"] }],
-      "manifests": { "plugin": ".cursor-plugin/plugin.json" },
+      "rules": [
+        {
+          "path": ".cursor/rules/{id}.mdc",
+          "format": "mdc",
+          "frontmatter": [
+            "description",
+            "globs",
+            "alwaysApply"
+          ]
+        }
+      ],
+      "manifests": {
+        "plugin": ".cursor-plugin/plugin.json"
+      },
       "mcp": {
         "status": "experimental",
-        "config": { "project": ".cursor/mcp.json" },
+        "config": {
+          "project": ".cursor/mcp.json"
+        },
         "format": "json",
         "container": "mcpServers",
         "urlField": "url",
@@ -180,12 +311,23 @@
     "windsurf": {
       "name": "Windsurf",
       "status": "stable",
-      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
+      "verified": {
+        "against": "observed in at least one family installer",
+        "at": "2026-10-03"
+      },
       "hooks": null,
-      "rules": [{ "path": ".windsurfrules", "format": "plain", "ownership": "first-line-marker" }],
+      "rules": [
+        {
+          "path": ".windsurfrules",
+          "format": "plain",
+          "ownership": "first-line-marker"
+        }
+      ],
       "mcp": {
         "status": "experimental",
-        "config": { "user": "~/.codeium/windsurf/mcp_config.json" },
+        "config": {
+          "user": "~/.codeium/windsurf/mcp_config.json"
+        },
         "format": "json",
         "container": "mcpServers",
         "urlField": "url",
@@ -198,24 +340,47 @@
     "aider": {
       "name": "Aider",
       "status": "stable",
-      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
+      "verified": {
+        "against": "observed in at least one family installer",
+        "at": "2026-10-03"
+      },
       "hooks": null,
-      "rules": [{ "path": "CONVENTIONS.md", "format": "plain", "ownership": "first-line-marker", "note": "pair with aider --read CONVENTIONS.md" }]
+      "rules": [
+        {
+          "path": "CONVENTIONS.md",
+          "format": "plain",
+          "ownership": "first-line-marker",
+          "note": "pair with aider --read CONVENTIONS.md"
+        }
+      ]
     },
     "cline": {
       "name": "Cline",
       "status": "stable",
-      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
+      "verified": {
+        "against": "observed in at least one family installer",
+        "at": "2026-10-03"
+      },
       "hooks": null,
       "plugin": {
         "inProcess": "long-lived sandbox subprocess host (see dejavu src/cline-plugin.ts); declared via package.json \"cline.plugins\"",
         "manifestHooksDialect": "claude"
       },
-      "rules": [{ "path": ".clinerules", "format": "plain", "ownership": "first-line-marker" }],
-      "manifests": { "plugin": "plugin.json" },
+      "rules": [
+        {
+          "path": ".clinerules",
+          "format": "plain",
+          "ownership": "first-line-marker"
+        }
+      ],
+      "manifests": {
+        "plugin": "plugin.json"
+      },
       "mcp": {
         "status": "experimental",
-        "config": { "project": "mcp_settings.json" },
+        "config": {
+          "project": "mcp_settings.json"
+        },
         "format": "json",
         "container": "mcpServers",
         "urlField": "url",
@@ -231,18 +396,38 @@
     "kiro": {
       "name": "Kiro",
       "status": "stable",
-      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
+      "verified": {
+        "against": "observed in at least one family installer",
+        "at": "2026-10-03"
+      },
       "hooks": {
-        "config": { "project": ".kiro/hooks/{tool}.json" },
+        "config": {
+          "project": ".kiro/hooks/{tool}.json"
+        },
         "write": "overwrite",
         "shape": "hooks-array",
-        "envelope": { "version": "v1" },
-        "triggers": ["PreToolUse", "PostToolUse"],
-        "entryFields": { "nameConvention": "{tool}-pre | {tool}-post", "commandPath": ["action", "command"], "timeoutUnit": "seconds" }
+        "envelope": {
+          "version": "v1"
+        },
+        "triggers": [
+          "PreToolUse",
+          "PostToolUse"
+        ],
+        "entryFields": {
+          "nameConvention": "{tool}-pre | {tool}-post",
+          "commandPath": [
+            "action",
+            "command"
+          ],
+          "timeoutUnit": "seconds"
+        }
       },
       "mcp": {
         "status": "experimental",
-        "config": { "project": ".kiro/settings/mcp.json", "user": "~/.kiro/settings/mcp.json" },
+        "config": {
+          "project": ".kiro/settings/mcp.json",
+          "user": "~/.kiro/settings/mcp.json"
+        },
         "format": "json",
         "container": "mcpServers",
         "urlField": "url",
@@ -258,40 +443,85 @@
     "devin": {
       "name": "Devin CLI",
       "status": "stable",
-      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
+      "verified": {
+        "against": "observed in at least one family installer",
+        "at": "2026-10-03"
+      },
       "hooks": {
-        "config": { "project": ".devin/hooks.v1.json" },
+        "config": {
+          "project": ".devin/hooks.v1.json"
+        },
         "write": "merge",
         "shape": "root-events",
-        "events": ["PreToolUse", "PostToolUse"],
-        "entryFields": { "type": "command", "timeoutUnit": "seconds" }
+        "events": [
+          "PreToolUse",
+          "PostToolUse"
+        ],
+        "entryFields": {
+          "type": "command",
+          "timeoutUnit": "seconds"
+        }
       },
-      "rules": [{ "path": ".devin/rules/{id}.md", "format": "plain" }],
+      "rules": [
+        {
+          "path": ".devin/rules/{id}.md",
+          "format": "plain"
+        }
+      ],
       "notes": "Event keys sit at the config root (no hooks wrapper). Auto-imports .claude/settings.json hooks (read_config_from.claude), so a Claude install already gates Devin sessions. Known shared-file site: two family tools wrote this file with different identity substrings - the reason ownership moved to a sidecar."
     },
     "copilot": {
       "name": "VS Code Copilot (local hooks)",
       "status": "preview",
       "hooks": {
-        "config": { "project": ".github/hooks/{tool}.json", "user": ".copilot/hooks/{tool}.json" },
+        "config": {
+          "project": ".github/hooks/{tool}.json",
+          "user": ".copilot/hooks/{tool}.json"
+        },
         "write": "overwrite",
         "shape": "versioned-typed",
-        "envelope": { "version": 1 },
-        "events": ["preToolUse", "postToolUse", "postToolUseFailure"],
-        "entryFields": { "type": "command", "timeoutUnit": "timeoutSec" }
+        "envelope": {
+          "version": 1
+        },
+        "events": [
+          "preToolUse",
+          "postToolUse",
+          "postToolUseFailure"
+        ],
+        "entryFields": {
+          "type": "command",
+          "timeoutUnit": "timeoutSec"
+        }
       },
-      "rules": [{ "path": ".github/copilot-instructions.md", "format": "marker-block", "markers": { "open": "<!-- >>> {id} >>> -->", "close": "<!-- <<< {id} <<< -->" } }],
+      "rules": [
+        {
+          "path": ".github/copilot-instructions.md",
+          "format": "marker-block",
+          "markers": {
+            "open": "<!-- >>> {id} >>> -->",
+            "close": "<!-- <<< {id} <<< -->"
+          }
+        }
+      ],
       "notes": "Preview feature: tool names are not a stable API - gate payloads by shape (file_path+content / old+new_string / edits[] / V4A patch text), never by name. Per-tool file ownership makes overwrite safe here."
     },
     "crush": {
       "name": "Crush",
       "status": "experimental",
       "hooks": {
-        "config": { "project": ".crush/crush.json", "user": ".config/crush/crush.json" },
+        "config": {
+          "project": ".crush/crush.json",
+          "user": ".config/crush/crush.json"
+        },
         "write": "merge",
         "shape": "flat-matcher",
-        "events": ["PreToolUse"],
-        "entryFields": { "type": null, "timeoutUnit": null }
+        "events": [
+          "PreToolUse"
+        ],
+        "entryFields": {
+          "type": null,
+          "timeoutUnit": null
+        }
       },
       "notes": "No AfterTool hook exists - failure observation is degraded (pre-tool only). Entries are flat {matcher, command}."
     },
@@ -301,7 +531,9 @@
       "hooks": null,
       "mcp": {
         "status": "experimental",
-        "config": { "project": ".vscode/mcp.json" },
+        "config": {
+          "project": ".vscode/mcp.json"
+        },
         "format": "json",
         "container": "servers",
         "urlField": "url",
@@ -319,7 +551,9 @@
       "hooks": null,
       "mcp": {
         "status": "experimental",
-        "config": { "project": ".roo/mcp.json" },
+        "config": {
+          "project": ".roo/mcp.json"
+        },
         "format": "json",
         "container": "mcpServers",
         "urlField": "url",
@@ -337,7 +571,10 @@
       "hooks": null,
       "mcp": {
         "status": "experimental",
-        "config": { "project": ".zed/settings.json", "user": "~/.config/zed/settings.json" },
+        "config": {
+          "project": ".zed/settings.json",
+          "user": "~/.config/zed/settings.json"
+        },
         "format": "json",
         "container": "context_servers",
         "urlField": "url",
@@ -353,7 +590,9 @@
       "hooks": null,
       "mcp": {
         "status": "experimental",
-        "config": { "user": "~/.factory/mcp.json" },
+        "config": {
+          "user": "~/.factory/mcp.json"
+        },
         "format": "json",
         "container": "mcpServers",
         "urlField": "url",
@@ -369,71 +608,191 @@
       "name": "goose",
       "status": "experimental",
       "hooks": {
-        "config": { "project": ".agents/plugins/{tool}/hooks/hooks.json", "user": "~/.agents/plugins/{tool}/hooks/hooks.json" },
+        "config": {
+          "project": ".agents/plugins/{tool}/hooks/hooks.json",
+          "user": "~/.agents/plugins/{tool}/hooks/hooks.json"
+        },
         "write": "overwrite",
         "shape": "nested-hooks",
-        "events": ["SessionStart", "SessionEnd", "Stop", "UserPromptSubmit", "PreToolUse", "PreToolUseResult", "PostToolUse", "PostToolUseFailure", "BeforeReadFile", "AfterFileEdit", "BeforeShellExecution", "AfterShellExecution"],
-        "entryFields": { "type": "command", "timeoutUnit": "seconds" },
-        "envOverrides": { "configDir": "GOOSE_PATH_ROOT" }
+        "events": [
+          "SessionStart",
+          "SessionEnd",
+          "Stop",
+          "UserPromptSubmit",
+          "PreToolUse",
+          "PreToolUseResult",
+          "PostToolUse",
+          "PostToolUseFailure",
+          "BeforeReadFile",
+          "AfterFileEdit",
+          "BeforeShellExecution",
+          "AfterShellExecution"
+        ],
+        "entryFields": {
+          "type": "command",
+          "timeoutUnit": "seconds"
+        },
+        "envOverrides": {
+          "configDir": "GOOSE_PATH_ROOT"
+        }
       },
-      "skills": { "global": [".agents/skills"], "project": [".agents/skills"] },
+      "skills": {
+        "global": [
+          ".agents/skills"
+        ],
+        "project": [
+          ".agents/skills"
+        ]
+      },
       "notes": "Hooks are a plugin-scoped JSON file (regex matcher, seconds). MCP lives in config.yaml (container `extensions`, url `uri`) - not representable here, verify before wiring. Backward-compat read paths .goose/skills and .claude/skills."
     },
     "hermes": {
       "name": "Hermes Agent",
       "status": "experimental",
       "hooks": {
-        "config": { "project": ".hermes/config.yaml", "user": "~/.hermes/config.yaml" },
+        "config": {
+          "project": ".hermes/config.yaml",
+          "user": "~/.hermes/config.yaml"
+        },
         "write": "print-only",
-        "events": ["pre_tool_call", "post_tool_call", "pre_llm_call", "post_llm_call", "on_session_start", "on_session_end"],
-        "entryFields": { "timeoutUnit": "seconds" },
-        "envOverrides": { "configDir": "HERMES_HOME" }
+        "events": [
+          "pre_tool_call",
+          "post_tool_call",
+          "pre_llm_call",
+          "post_llm_call",
+          "on_session_start",
+          "on_session_end"
+        ],
+        "entryFields": {
+          "timeoutUnit": "seconds"
+        },
+        "envOverrides": {
+          "configDir": "HERMES_HOME"
+        }
       },
-      "skills": { "global": ["~/.hermes/skills"] },
+      "skills": {
+        "global": [
+          "~/.hermes/skills"
+        ]
+      },
       "notes": "Shell hooks live in config.yaml (YAML, not JSON): {matcher, command, timeout seconds, fail_closed}; project scope `.hermes/` is trust-gated (verify). MCP container `mcp_servers` (YAML)."
     },
     "openhands": {
       "name": "OpenHands",
       "status": "experimental",
       "hooks": {
-        "config": { "project": ".openhands/hooks.json" },
+        "config": {
+          "project": ".openhands/hooks.json"
+        },
         "write": "merge",
         "shape": "nested-hooks",
-        "events": ["PreToolUse", "PostToolUse", "UserPromptSubmit", "Stop", "SessionStart", "SessionEnd"],
-        "entryFields": { "type": "command", "timeoutUnit": "seconds" }
+        "events": [
+          "PreToolUse",
+          "PostToolUse",
+          "UserPromptSubmit",
+          "Stop",
+          "SessionStart",
+          "SessionEnd"
+        ],
+        "entryFields": {
+          "type": "command",
+          "timeoutUnit": "seconds"
+        }
       },
-      "skills": { "project": [".agents/skills"], "global": ["~/.agents/skills"] },
+      "skills": {
+        "project": [
+          ".agents/skills"
+        ],
+        "global": [
+          "~/.agents/skills"
+        ]
+      },
       "notes": "Claude-Code-compatible hook entries {matcher, hooks:[{command,timeout,async,type}]}; also .openhands/setup.sh and AGENTS.md. MCP is user-scope only (no per-project file)."
     },
     "continue": {
       "name": "Continue",
       "status": "experimental",
       "hooks": {
-        "config": { "project": ".continue/settings.json", "user": "~/.continue/settings.json" },
+        "config": {
+          "project": ".continue/settings.json",
+          "user": "~/.continue/settings.json"
+        },
         "write": "merge",
         "shape": "nested-hooks",
-        "events": ["PreToolUse", "PostToolUse", "PostToolUseFailure", "PermissionRequest", "UserPromptSubmit", "SessionStart", "SessionEnd", "Stop", "Notification", "SubagentStart", "SubagentStop", "PreCompact"],
-        "entryFields": { "type": "command", "timeoutUnit": "seconds" },
-        "envOverrides": { "configDir": "CONTINUE_GLOBAL_DIR" }
+        "events": [
+          "PreToolUse",
+          "PostToolUse",
+          "PostToolUseFailure",
+          "PermissionRequest",
+          "UserPromptSubmit",
+          "SessionStart",
+          "SessionEnd",
+          "Stop",
+          "Notification",
+          "SubagentStart",
+          "SubagentStop",
+          "PreCompact"
+        ],
+        "entryFields": {
+          "type": "command",
+          "timeoutUnit": "seconds"
+        },
+        "envOverrides": {
+          "configDir": "CONTINUE_GLOBAL_DIR"
+        }
       },
-      "skills": { "project": [".continue/skills"], "global": ["~/.continue/skills"] },
+      "skills": {
+        "project": [
+          ".continue/skills"
+        ],
+        "global": [
+          "~/.continue/skills"
+        ]
+      },
       "notes": "CLI only (IDE extension has no hooks); hook config precedence .claude/ < .continue/ < *.local.json. MCP in config.yaml (YAML) or .continue/mcpServers/*.json."
     },
     "junie": {
       "name": "Junie",
       "status": "experimental",
       "hooks": {
-        "config": { "project": ".junie/config.json", "user": "~/.junie/config.json" },
+        "config": {
+          "project": ".junie/config.json",
+          "user": "~/.junie/config.json"
+        },
         "write": "merge",
         "shape": "nested-hooks",
-        "events": ["SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "Stop", "StopFailure", "SessionEnd", "PermissionRequest"],
-        "entryFields": { "type": "command", "timeoutUnit": "seconds" },
-        "envOverrides": { "configLocation": "JUNIE_CONFIG_LOCATION" }
+        "events": [
+          "SessionStart",
+          "UserPromptSubmit",
+          "PreToolUse",
+          "PostToolUse",
+          "Stop",
+          "StopFailure",
+          "SessionEnd",
+          "PermissionRequest"
+        ],
+        "entryFields": {
+          "type": "command",
+          "timeoutUnit": "seconds"
+        },
+        "envOverrides": {
+          "configLocation": "JUNIE_CONFIG_LOCATION"
+        }
       },
-      "skills": { "project": [".junie/skills"], "global": ["~/.junie/skills"] },
+      "skills": {
+        "project": [
+          ".junie/skills"
+        ],
+        "global": [
+          "~/.junie/skills"
+        ]
+      },
       "mcp": {
         "status": "experimental",
-        "config": { "project": ".junie/mcp/mcp.json", "user": "~/.junie/mcp/mcp.json" },
+        "config": {
+          "project": ".junie/mcp/mcp.json",
+          "user": "~/.junie/mcp/mcp.json"
+        },
         "format": "json",
         "container": "mcpServers",
         "urlField": "url",
@@ -448,7 +807,10 @@
       "hooks": null,
       "mcp": {
         "status": "experimental",
-        "config": { "project": ".omp/mcp.json", "user": "~/.omp/agent/mcp.json" },
+        "config": {
+          "project": ".omp/mcp.json",
+          "user": "~/.omp/agent/mcp.json"
+        },
         "format": "json",
         "container": "mcpServers",
         "urlField": "url",
@@ -456,8 +818,17 @@
         "tokenEnvSyntax": "${VAR}",
         "write": "merge"
       },
-      "skills": { "project": [".omp/skills"], "global": ["~/.omp/agent/skills"] },
-      "envOverrides": { "configDir": "PI_CONFIG_DIR" },
+      "skills": {
+        "project": [
+          ".omp/skills"
+        ],
+        "global": [
+          "~/.omp/agent/skills"
+        ]
+      },
+      "envOverrides": {
+        "configDir": "PI_CONFIG_DIR"
+      },
       "notes": "Pi fork. Hooks are TS/JS modules (.omp/hooks/pre|post), no JSON hook surface. MCP supports `${VAR}` and `${VAR:-default}`."
     },
     "pi": {
@@ -466,7 +837,10 @@
       "hooks": null,
       "mcp": {
         "status": "experimental",
-        "config": { "project": ".pi/mcp.json", "user": "~/.pi/agent/mcp.json" },
+        "config": {
+          "project": ".pi/mcp.json",
+          "user": "~/.pi/agent/mcp.json"
+        },
         "format": "json",
         "container": "mcpServers",
         "urlField": "url",
@@ -474,8 +848,17 @@
         "tokenEnvSyntax": "${VAR}",
         "write": "merge"
       },
-      "skills": { "project": [".pi/skills"], "global": ["~/.pi/agent/skills"] },
-      "envOverrides": { "configDir": "PI_CODING_AGENT_DIR" },
+      "skills": {
+        "project": [
+          ".pi/skills"
+        ],
+        "global": [
+          "~/.pi/agent/skills"
+        ]
+      },
+      "envOverrides": {
+        "configDir": "PI_CODING_AGENT_DIR"
+      },
       "notes": "Hooks only via TS extensions (pi.on), no JSON hook surface. MCP type is stdio|http|streamable-http (inferred from command/url)."
     },
     "kimi-code": {
@@ -484,7 +867,10 @@
       "hooks": null,
       "mcp": {
         "status": "experimental",
-        "config": { "project": ".kimi-code/mcp.json", "user": "~/.kimi-code/mcp.json" },
+        "config": {
+          "project": ".kimi-code/mcp.json",
+          "user": "~/.kimi-code/mcp.json"
+        },
         "format": "json",
         "container": "mcpServers",
         "urlField": "url",
@@ -492,8 +878,17 @@
         "write": "print-only",
         "note": "bearerTokenEnvVar holds the env-var NAME (no literal secret); no `${VAR}` interpolation"
       },
-      "skills": { "project": [".kimi-code/skills"], "global": ["~/.kimi-code/skills"] },
-      "envOverrides": { "configDir": "KIMI_CODE_HOME" },
+      "skills": {
+        "project": [
+          ".kimi-code/skills"
+        ],
+        "global": [
+          "~/.kimi-code/skills"
+        ]
+      },
+      "envOverrides": {
+        "configDir": "KIMI_CODE_HOME"
+      },
       "notes": "Hooks are user-scope only in config.toml (TOML): {event, matcher, command, timeout seconds} - no project hook file. MCP also .kimi-code/mcp.json; transport `sse` explicit, stdio/http inferred."
     },
     "amp": {
@@ -502,30 +897,65 @@
       "hooks": null,
       "mcp": {
         "status": "experimental",
-        "config": { "project": ".amp/settings.json", "user": "~/.config/amp/settings.json" },
+        "config": {
+          "project": ".amp/settings.json",
+          "user": "~/.config/amp/settings.json"
+        },
         "format": "jsonc",
         "container": "amp.mcpServers",
         "urlField": "url",
         "tokenEnvSyntax": "${VAR}",
         "write": "print-only"
       },
-      "skills": { "global": ["~/.config/amp/skills"] },
+      "skills": {
+        "global": [
+          "~/.config/amp/skills"
+        ]
+      },
       "notes": "Closed-source (sourcegraph/amp repo is 404; docs at ampcode.com). No hook config - event-driven TS plugins. MCP lives under the literal top-level key `amp.mcpServers`; file may be .jsonc (kept print-only)."
     },
     "zcode": {
       "name": "ZCode",
       "status": "experimental",
       "hooks": {
-        "config": { "project": ".zcode/config.json", "user": "~/.zcode/cli/config.json" },
+        "config": {
+          "project": ".zcode/config.json",
+          "user": "~/.zcode/cli/config.json"
+        },
         "write": "print-only",
         "shape": "nested-hooks",
-        "events": ["SessionStart", "UserPromptSubmit", "PreToolUse", "PermissionRequest", "PostToolUse", "PostToolUseFailure", "Stop"],
-        "entryFields": { "type": "process|command", "timeoutUnit": "milliseconds" }
+        "events": [
+          "SessionStart",
+          "UserPromptSubmit",
+          "PreToolUse",
+          "PermissionRequest",
+          "PostToolUse",
+          "PostToolUseFailure",
+          "Stop"
+        ],
+        "entryFields": {
+          "type": "process|command",
+          "timeoutUnit": "milliseconds"
+        }
       },
-      "skills": { "global": ["~/.zcode/skills", "~/.agents/skills", "~/.claude/skills"], "project": [".zcode/skills", ".agents/skills", ".claude/skills"] },
+      "skills": {
+        "global": [
+          "~/.zcode/skills",
+          "~/.agents/skills",
+          "~/.claude/skills"
+        ],
+        "project": [
+          ".zcode/skills",
+          ".agents/skills",
+          ".claude/skills"
+        ]
+      },
       "mcp": {
         "status": "experimental",
-        "config": { "project": ".zcode/config.json", "user": "~/.zcode/cli/config.json" },
+        "config": {
+          "project": ".zcode/config.json",
+          "user": "~/.zcode/cli/config.json"
+        },
         "format": "json",
         "container": "mcp.servers",
         "urlField": "url",
@@ -540,18 +970,36 @@
       "name": "DeepSeek Harness",
       "status": "experimental",
       "hooks": null,
-      "skills": { "global": ["~/.dsh/skills", "~/.agents/skills"], "project": [".dsh/skills", ".agents/skills"] },
+      "skills": {
+        "global": [
+          "~/.dsh/skills",
+          "~/.agents/skills"
+        ],
+        "project": [
+          ".dsh/skills",
+          ".agents/skills"
+        ]
+      },
       "notes": "Config is a Cordis plugin composition: ordered YAML patch layers (`$DSH_HOME/cordis.patch.yml`, profile `cordis.patch.yml`) over a JSON profile manifest - no hook/MCP JSON file surface. Hooks exist only as opt-in bridges that read Claude Code / Codex `hooks.json`. MCP servers are per-server `dsh-mcp-client` plugin rows in YAML. Skills: `<name>/SKILL.md` or flat `<name>.md`, nested `**/SKILL.md` unsupported. Instructions via AGENTS.md (+ CLAUDE.md)."
     },
     "git": {
       "name": "git (pre-commit enforcement surface)",
       "status": "stable",
-      "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
+      "verified": {
+        "against": "observed in at least one family installer",
+        "at": "2026-10-03"
+      },
       "hooks": {
-        "config": { "project": ".git/hooks/pre-commit" },
+        "config": {
+          "project": ".git/hooks/pre-commit"
+        },
         "resolveVia": "git config core.hooksPath",
         "write": "marker-block",
-        "markers": { "open": "# >>> {id} >>>", "close": "# <<< {id} <<<", "mode": "append-or-replace, never clobber a foreign hook" }
+        "markers": {
+          "open": "# >>> {id} >>>",
+          "close": "# <<< {id} <<<",
+          "mode": "append-or-replace, never clobber a foreign hook"
+        }
       },
       "notes": "Not an AI harness; included because the marker-block primitive and install UX are shared with harness wiring."
     }

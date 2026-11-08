@@ -1,6 +1,12 @@
 # Changelog
 
-Keep-a-changelog format. The package `version` is independent of the registry's `registryVersion` (see `registry/CHANGELOG.md`).
+Keep-a-changelog format. `registryVersion` mirrors the package `version`: there is one version everywhere (`npm run version:sync` sets it); historical registry-only versions live in `registry/CHANGELOG.md`.
+
+## 0.10.0
+
+- Owner-scoped MCP server-map merge (`mergeMcpServers`): six JSON, env-interpolated `mcp` rows (claude, gemini, cursor, windsurf, kiro, factory) move from `print-only` to `write: "merge"`.
+- Registry grows by 11 experimental harness rows: goose, hermes, openhands, continue, junie, oh-my-pi, pi, kimi-code, amp and zcode, deepseek.
+- One version everywhere: `registryVersion` is now a mirror of the package `version`, set by `npm run version:sync`; `version:check` rejects any drift between the package, `CITATION.cff`, `docs/jsonld.jsonld`, `manifest.json` and the registry.
 
 ## 0.9.0
 

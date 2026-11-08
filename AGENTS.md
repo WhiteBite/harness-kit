@@ -38,7 +38,7 @@ npm run release       # sync + commit + tag the current (or bumped) version; pub
 
 - **Do** regenerate `manifest.json` in the same commit that changes `src/`, `registry/` or `types/`.
 - **Do** keep the registry factual: one reconciled value per fact; disagreements between tools are policy knobs in consumer code, never registry columns.
-- **Do** bump `registryVersion` (semver) and add a `registry/CHANGELOG.md` entry for every registry change.
+- **Do** keep `registryVersion` a mirror of the package `version` (`npm run version:sync` sets both) and add a `CHANGELOG.md` entry for every registry change.
 - **Do** mark unverified harness behavior `status: "experimental"` with a note naming what to verify.
 - **Do** treat `package.json` as the only hand-edited version; `npm run version:sync` propagates it to `CITATION.cff`, `docs/jsonld.jsonld` and `manifest.json`.
 - **Do** release via `npm run release` so every version gets a `v*` tag (CI fails on main when the version is untagged) and a `CHANGELOG.md` section.
