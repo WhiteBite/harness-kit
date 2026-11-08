@@ -6,13 +6,13 @@
     "src/atomic.mjs": "2053c7baecbe1a4d2afe6941a2ef952f57c5396671cda8efc064a86f1a64d5c9",
     "src/doctor.mjs": "d112f655d1a063ae1e3ac52d5ad62ad0dd8910a1822d82e83e3d13a2d7e67a7f",
     "src/drift.mjs": "b04259238eeaa69c09e81babbb4fcb8f5972f0b4ffc35e60b084eed6ab37c079",
-    "src/index.mjs": "2caeb0fc5633482a79051e4051c401abc8e47470fff5d14202091b80190e24fe",
+    "src/index.mjs": "b188d8c81fb4845845d73c3c54e9da53d721fd170559a3b2403d2a559f6ba832",
     "src/jsonc.mjs": "143bd2d05257a9ed522b444f4722033eed1034bb560f91f4238331a91c4d8e7c",
     "src/manifest.mjs": "9724b86b0514055bdf635ef10619a7dc429f42a04c3d6749e430d756225ee37b",
     "src/marker.mjs": "2595f1a92dec23b642cd3974c180e062bebe8ef6b5a166a8b46c337c6d98eded",
     "src/mcp.mjs": "059ef52447b05b9581072ea30c9cf4b82af4f248f60823d12840728d73f5925b",
-    "src/merge.mjs": "f9a24e2a073c5315ae6f3bb12617b79bb55e5a38534e2e48f5ece71044c1de22",
-    "src/ownership.mjs": "c9510616a37035745c4b4330556512367798500dbf54b33855f6417eb131fe86",
+    "src/merge.mjs": "563f72b96e0288abba1a8ec0bff9fcfb4ecb61923e9e351113ae8565528d5a7f",
+    "src/ownership.mjs": "1afd9f350fc28c6850d8602b895827205ee736317d2ff3f84af1f0e981b3a5e0",
     "src/registry.mjs": "549c9e90e26ab10809f802d29da6cda2d977be423372c34b2766512da4c071e1",
     "src/shapes.mjs": "3a5b6eac457d1133997639e5caa7ac4a679dd25da6e33f9563449a03fa6934dc",
     "src/symlink.mjs": "0ea41d49da241c050ee3c895e88ed8d64ff05dcc495686c591e13e95b0105425",
@@ -21,6 +21,6 @@
     "registry/CHANGELOG.md": "64c7a73d4e40e92f9a5721ce24fd5f644f976549e80386af6c90dbbf9e4650cc",
     "registry/harnesses.json": "c8c3048987fa28108cf2a7baa803c5e1830b4e7434e2b783477975d9dca7b88d",
     "registry/harnesses.schema.json": "124f335736f399f4c0807b083a558ccceea82676c82ecc1e6129f432107d0e24",
-    "types/index.d.mts": "884fafc61314ffb71427006c184e643af1873631dcd083771c690a728854dc4f"
+    "types/index.d.mts": "4392d0258e58262cb849b9cbc20c39c4e441db058ceb6c62afda05dc5af0c7fd"
   }
 }

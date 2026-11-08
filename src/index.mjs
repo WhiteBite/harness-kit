@@ -1,5 +1,5 @@
 /** harness-kit public surface: registry facts + owner-scoped merge + ownership sidecar + atomic writes + templating. */
-export { mergeHooks } from './merge.mjs';
+export { mergeHooks, locatorFor, stripOwned } from './merge.mjs';
 export { mergeMcpServers } from './mcp.mjs';
 export { scanJsonc, parseJsonc, mergeJsoncContainer } from './jsonc.mjs';
 export { scanTomlTables, mergeTomlTable } from './toml.mjs';
@@ -17,6 +17,7 @@ export {
   resolveLocator,
   readOwnership,
   recordOwnership,
+  clearOwnership,
   ownedLocators,
   entryMatchesHash,
 } from './ownership.mjs';

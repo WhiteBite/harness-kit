@@ -50,7 +50,7 @@ export function readOwnership(root) {
   return { version: typeof data.version === 'number' ? data.version : 1, entries };
 }
 
-/** Replaces the (owner, file) records with fresh hashes resolved from the live config; other owners' records survive. */
+/** Appends fresh (owner, file, locator) records resolved from the live config; earlier records for other locators of the same owner/file survive (accumulating multi-surface writes). clearOwnership removes the set. */
 export function recordOwnership(root, owner, file, config, locators) {
   const sidecar = readOwnership(root);
   const fresh = locators.map((locator) => {
@@ -65,6 +65,13 @@ export function recordOwnership(root, owner, file, config, locators) {
 
 export function ownedLocators(root, owner, file) {
   return readOwnership(root).entries.filter((entry) => entry.owner === owner && (file === undefined || entry.file === file));
+}
+
+/** Removes every (owner, file) record - the uninstall counterpart to recordOwnership. */
+export function clearOwnership(root, owner, file) {
+  const sidecar = readOwnership(root);
+  const kept = sidecar.entries.filter((entry) => !(entry.owner === owner && (file === undefined || entry.file === file)));
+  writeJsonAtomic(sidecarPath(root), { version: 1, entries: kept });
 }
 
 export function entryMatchesHash(config, record) {

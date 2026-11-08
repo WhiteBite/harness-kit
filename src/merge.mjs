@@ -1,5 +1,16 @@
 /** Owner-scoped hook-config merge: strip only the caller's entries, append fresh ones, preserve every foreign byte. */
+import { canonicalJson, hashValue, resolveLocator } from './ownership.mjs';
 import { shapeDescriptor } from './shapes.mjs';
+
+/** Positional locator of an appended entry for one shape: ['hooks', event, index] for hook maps, [event, index] at the root, ['hooks', index] for the flat array. */
+export function locatorFor(shape, event, index) {
+  if (!Number.isInteger(index) || index < 0) throw new Error('locatorFor requires a non-negative integer index');
+  const { container } = shapeDescriptor(shape);
+  if (container === 'root') return [event, index];
+  if (container === 'hooks-array') return ['hooks', index];
+  if (typeof event !== 'string' || event === '') throw new Error('locatorFor requires an event name for hook-map shapes');
+  return ['hooks', event, index];
+}
 
 export function entryCommands(entry) {
   const commands = [];
@@ -120,4 +131,64 @@ export function mergeHooks(existing, template, { shape, isMine }) {
   }
 
   return merged;
+}
+
+/** Copy-on-write walk down `prefix`: every object/array along the path is cloned in `merged`, the leaf array is returned. */
+function copiedContainer(merged, prefix) {
+  if (prefix.length === 0) return undefined;
+  let parent = merged;
+  for (let i = 0; i < prefix.length; i += 1) {
+    const segment = prefix[i];
+    const value = parent[segment];
+    if (value === null || typeof value !== 'object') return undefined;
+    const clone = Array.isArray(value) ? [...value] : { ...value };
+    parent[segment] = clone;
+    if (i === prefix.length - 1) return Array.isArray(clone) ? clone : undefined;
+    parent = clone;
+  }
+  return undefined;
+}
+
+/**
+ * Sidecar-driven strip (coexistence rules 2-3): an entry at a recorded locator
+ * is removed when its sha256 matches, or - only when the caller passes isMine -
+ * when the command still matches the substring predicate after an out-of-band
+ * edit. A hash mismatch alone NEVER deletes: the entry may have shifted under
+ * a foreign install. Returns the stripped config and how many entries went.
+ */
+export function stripOwned(config, { records, isMine } = {}) {
+  if (!Array.isArray(records)) throw new Error('stripOwned requires records (the ownedLocators() output)');
+  if (isMine !== undefined && typeof isMine !== 'function') throw new Error('stripOwned requires an isMine(command) predicate when given');
+  const merged = { ...config };
+  const buckets = new Map();
+  for (const record of records) {
+    const locator = Array.isArray(record.locator) ? record.locator : null;
+    if (locator === null || locator.length === 0) continue;
+    if (typeof locator[locator.length - 1] !== 'number') continue;
+    const key = canonicalJson(locator.slice(0, -1));
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(record);
+  }
+  let removed = 0;
+  for (const group of buckets.values()) {
+    group.sort((a, b) => b.locator[b.locator.length - 1] - a.locator[a.locator.length - 1]);
+    for (const record of group) {
+      const prefix = record.locator.slice(0, -1);
+      const index = record.locator[record.locator.length - 1];
+      const arr = copiedContainer(merged, prefix);
+      if (arr === undefined) continue;
+      const entry = arr[index];
+      if (entry === undefined) continue;
+      const hashMatches = hashValue(entry) === record.sha256;
+      const substringMatches = isMine !== undefined && isOwnEntry(entry, isMine);
+      if (!hashMatches && !substringMatches) continue;
+      arr.splice(index, 1);
+      removed += 1;
+      if (arr.length === 0) {
+        const parent = resolveLocator(merged, prefix.slice(0, -1));
+        if (parent && typeof parent === 'object') delete parent[prefix[prefix.length - 1]];
+      }
+    }
+  }
+  return { config: merged, removed };
 }

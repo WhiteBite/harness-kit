@@ -92,6 +92,17 @@ export function mergeHooks(
   options: { shape: MergeShape; isMine: (command: unknown) => boolean },
 ): Record<string, unknown>;
 
+export function locatorFor(shape: MergeShape, event: string | null, index: number): (string | number)[];
+
+export interface StripOwnedResult {
+  config: Record<string, unknown>;
+  removed: number;
+}
+export function stripOwned(
+  config: Record<string, unknown>,
+  options: { records: OwnershipRecord[]; isMine?: (command: unknown) => boolean },
+): StripOwnedResult;
+
 export function mergeMcpServers(
   existing: Record<string, unknown>,
   template: Record<string, unknown>,
@@ -239,6 +250,7 @@ export function hashValue(value: unknown): string;
 export function resolveLocator(root: unknown, locator: (string | number)[]): unknown;
 export function readOwnership(root: string): { version: number; entries: OwnershipRecord[] };
 export function recordOwnership(root: string, owner: string, file: string, config: Record<string, unknown>, locators: (string | number)[][]): void;
+export function clearOwnership(root: string, owner: string, file?: string): void;
 export function ownedLocators(root: string, owner: string, file?: string): OwnershipRecord[];
 export function entryMatchesHash(config: Record<string, unknown>, record: OwnershipRecord): boolean;
 
