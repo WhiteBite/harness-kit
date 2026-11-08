@@ -13,13 +13,10 @@ const JSONLD = 'docs/jsonld.jsonld';
 const MANIFEST = 'manifest.json';
 const REGISTRY = 'registry/harnesses.json';
 const CHANGELOG = 'CHANGELOG.md';
+const SURFACES = [PKG, CITATION, JSONLD, REGISTRY, MANIFEST, CHANGELOG];
 
 function readJson(root, rel) {
   return JSON.parse(readFileSync(join(root, rel), 'utf8'));
-}
-
-function writeJson(root, rel, data) {
-  writeFileSync(join(root, rel), `${JSON.stringify(data, null, 2)}\n`, 'utf8');
 }
 
 function readText(root, rel) {
@@ -76,11 +73,13 @@ export function applySync(root) {
   }
 
   const jsonldPath = join(root, JSONLD);
-  const jsonld = JSON.parse(readFileSync(jsonldPath, 'utf8'));
-  if (jsonld.softwareVersion !== version) {
-    jsonld.softwareVersion = version;
-    writeJson(root, JSONLD, jsonld);
+  const jsonldText = readFileSync(jsonldPath, 'utf8');
+  const nextJsonld = jsonldText.replace(/^(\s*"softwareVersion": ")[^"]+(")/m, `$1${version}$2`);
+  if (nextJsonld !== jsonldText) {
+    writeFileSync(jsonldPath, nextJsonld, 'utf8');
     changed.push(JSONLD);
+  } else if (JSON.parse(jsonldText).softwareVersion !== version) {
+    throw new Error('sync: docs/jsonld.jsonld has no top-level "softwareVersion" line');
   }
 
   const registryText = readText(root, REGISTRY);
@@ -160,13 +159,19 @@ function cmdTag(root) {
   return 0;
 }
 
-function cmdRelease(root, level, { push = false } = {}) {
+function assertVendorTreeClean(root) {
+  const dirty = git(root, ['status', '--porcelain', '--', 'src', 'registry', 'types']).trim();
+  if (dirty) throw new Error(`release: refusing to release with uncommitted vendored files (manifest.json hashes the tree):\n${dirty}`);
+}
+
+export function cmdRelease(root, level, { push = false } = {}) {
+  assertVendorTreeClean(root);
   if (level) cmdBump(root, level);
   applySync(root);
   const version = readJson(root, PKG).version;
   const tag = `v${version}`;
 
-  git(root, ['add', PKG, CITATION, JSONLD, MANIFEST, CHANGELOG]);
+  git(root, ['add', ...SURFACES]);
   let dirty = true;
   try {
     git(root, ['diff', '--cached', '--quiet']);
@@ -177,13 +182,12 @@ function cmdRelease(root, level, { push = false } = {}) {
   if (dirty) git(root, ['commit', '-m', `chore: release ${version}`], { inherit: true });
   else console.log('version:release: nothing to commit');
 
-  if (gitTags(root).includes(tag)) git(root, ['tag', '-d', tag]);
+  if (gitTags(root).includes(tag)) throw new Error(`release: tag ${tag} already exists; delete it explicitly to re-release`);
   git(root, ['tag', '-a', tag, '-m', `harness-kit ${version}`], { inherit: true });
   console.log(`version:release: ${version} committed and tagged ${tag}`);
 
   if (push) {
-    git(root, ['push'], { inherit: true });
-    git(root, ['push', 'origin', tag], { inherit: true });
+    git(root, ['push', '--follow-tags'], { inherit: true });
   } else {
     console.log('version:release: push with `git push --follow-tags` (or --push) to trigger publishing');
   }

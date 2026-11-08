@@ -36,6 +36,9 @@ jobs:
       - name: Test suite
         run: npm test
 
+      - name: Version surfaces agree
+        run: npm run version:check
+
       - name: Release integrity check
         run: node scripts/release-check.mjs
 
@@ -67,7 +70,7 @@ jobs:
         run: |
           name=$(node -p "require('./package.json').name")
           local=$(node -p "require('./package.json').version")
-          published=$(npm view "$name" version 2>/dev/null || echo none)
+          published=$(npm view "$name@$local" version 2>/dev/null || echo none)
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             npm publish --dry-run --access public
           elif [ "$local" = "$published" ]; then

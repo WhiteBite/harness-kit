@@ -7,7 +7,7 @@ Project: **harness-kit** — canonical registry and zero-dependency primitives f
 ## Commands
 
 ```bash
-npm test              # node --test: coexistence spike, atomic/template, symlink state machine
+npm test              # node --test + selftest: coexistence spike, atomic/template, symlink state machine, registry validation
 npm run self-test     # registry validation + sabotage fixtures + two-owner merge sweep
 npm run manifest      # regenerate manifest.json after any src/, registry/ or types/ change
 npm run version:check # fail if a version surface drifted from package.json
@@ -27,9 +27,10 @@ npm run release       # sync + commit + tag the current (or bumped) version; pub
 | `src/template.mjs` | `{{VAR}}` substitution with full JSON-string escaping |
 | `src/symlink.mjs` | skill-dir linking with absent/linked/foreign-link/manual classification |
 | `src/registry.mjs` | loader + zero-dep structural validator |
-| `scripts/self-test.mjs` | sabotage-checked invariants + coexistence sweep |
+| `scripts/selftest.mjs` | sabotage-checked invariants + coexistence sweep |
 | `scripts/manifest.mjs` | deterministic hash manifest for vendored sync-checks |
 | `scripts/version.mjs` | single-source version: sync/check/bump/tag/release |
+| `scripts/release-check.mjs` | release-integrity gate: tag==version + packed-artifact vendor smoke |
 | `docs/consumption.md` | vendoring + sync-check procedure |
 | `docs/coexistence.md` | multi-tool ownership convention |
 | `docs/dialects.md` | shape catalog + how to add a harness |

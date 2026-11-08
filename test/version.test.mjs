@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { applySync, nextVersion, surfaceProblems, tagProblem } from '../scripts/version.mjs';
+import { applySync, cmdRelease, nextVersion, surfaceProblems, tagProblem } from '../scripts/version.mjs';
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 
@@ -75,6 +76,62 @@ test('a registryVersion drift is reported and repaired in place', () => {
     assert.match(surfaceProblems(root).join('\n'), /registry registryVersion 9\.9\.9 != package/);
     assert.ok(applySync(root).includes('registry/harnesses.json'));
     assert.equal(readFileSync(registryPath, 'utf8'), original, 'only the registryVersion line may change');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('a jsonld softwareVersion drift is repaired in place', () => {
+  const root = fixture();
+  try {
+    applySync(root);
+    const jsonldPath = join(root, 'docs', 'jsonld.jsonld');
+    const original = readFileSync(jsonldPath, 'utf8');
+    const version = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version;
+    const tampered = original.replace(`"softwareVersion": "${version}"`, '"softwareVersion": "9.9.9"');
+    assert.notEqual(tampered, original, 'the fixture jsonld must carry the package version');
+    writeFileSync(jsonldPath, tampered, 'utf8');
+    assert.match(surfaceProblems(root).join('\n'), /jsonld softwareVersion 9\.9\.9 != package/);
+    assert.ok(applySync(root).includes('docs/jsonld.jsonld'));
+    assert.equal(readFileSync(jsonldPath, 'utf8'), original, 'only the softwareVersion line may change');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+function gitFixture() {
+  const root = fixture();
+  const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' });
+  git('init', '-q');
+  git('config', 'user.email', 'test@example.invalid');
+  git('config', 'user.name', 'test');
+  git('config', 'core.hooksPath', '.no-hooks');
+  git('add', '-A');
+  git('commit', '-qm', 'base');
+  return { root, git };
+}
+
+test('release commits every release surface, including the registry', () => {
+  const { root, git } = gitFixture();
+  try {
+    cmdRelease(root, '1.10.4', { push: false });
+    const committed = git('show', '--name-only', '--format=', 'HEAD').trim().split(/\r?\n/);
+    for (const surface of ['package.json', 'CITATION.cff', 'docs/jsonld.jsonld', 'registry/harnesses.json', 'manifest.json', 'CHANGELOG.md']) {
+      assert.ok(committed.includes(surface), `release commit must include ${surface}`);
+    }
+    assert.equal(git('status', '--porcelain').trim(), '', 'release must leave a clean tree');
+    assert.match(git('tag', '--list'), /v1\.10\.4/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('release refuses to run with uncommitted vendored files', () => {
+  const { root } = gitFixture();
+  try {
+    mkdirSync(join(root, 'src'), { recursive: true });
+    writeFileSync(join(root, 'src', 'scratch.mjs'), 'export const scratch = 1;\n', 'utf8');
+    assert.throws(() => cmdRelease(root, '1.10.4', { push: false }), /uncommitted vendored files/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
