@@ -1,0 +1,62 @@
+{
+  "theme": "opencode",
+  "windowTitle": "wire slop-gate into every harness",
+  "arrowCaption": "harness-kit mergeHooks",
+  "statusLeft": "esc interrupt",
+  "statusRight": "ctrl+t variants  tab agents  ctrl+p commands",
+
+  "before": {
+    "caption": "hand-edited, drifting",
+    "sessionTitle": "# wire slop-gate into every harness",
+    "usage": "18,240  12%  ($0.06)",
+    "blocks": [
+      { "type": "user", "text": "wire the slop-gate hook into every harness" },
+      { "type": "prose", "text": "I'll hand-edit each harness config." },
+      { "type": "tool", "kind": "call", "text": "Edit .claude/settings.json" },
+      { "type": "diff", "lines": [
+        { "type": "add", "text": "\"PreToolUse\": [{ \"command\": \"node scan.mjs\" }]" }
+      ] },
+      { "type": "tool", "kind": "call", "text": "Edit .codex/hooks.json" },
+      { "type": "diff", "lines": [
+        { "type": "add", "text": "\"PreToolUse\": [{ \"command\": \"node ./scan.mjs --pre\" }]" }
+      ] },
+      { "type": "tool", "kind": "call", "text": "Edit .opencode/plugin/slop-gate.ts" },
+      { "type": "diff", "lines": [
+        { "type": "add", "text": "export default { id: \"slop-gate\" }" }
+      ] },
+      { "type": "status", "text": "3 harnesses, 3 dialects, 3 command strings" }
+    ],
+    "agentName": "Build",
+    "agentModel": "· claude-opus-4-5",
+    "inputAgent": "Build",
+    "inputModel": "Claude Opus 4.5",
+    "inputProvider": "OpenCode Zen"
+  },
+
+  "after": {
+    "caption": "one merge, consistent",
+    "sessionTitle": "# wire slop-gate into every harness",
+    "usage": "9,120  6%  ($0.03)",
+    "blocks": [
+      { "type": "user", "text": "wire the slop-gate hook into every harness" },
+      { "type": "prose", "text": "One `mergeHooks` call per harness, owner-scoped." },
+      { "type": "tool", "kind": "call", "text": "mergeHooks(existing, template, { shape, isMine })" },
+      { "type": "diff", "lines": [
+        { "type": "ctx", "text": "claude    .claude/settings.json" },
+        { "type": "add", "text": "\"command\": \"node scan.mjs\"" },
+        { "type": "ctx", "text": "codex     .codex/hooks.json" },
+        { "type": "add", "text": "\"command\": \"node scan.mjs\"" },
+        { "type": "ctx", "text": "opencode  .opencode/plugin/slop-gate.ts" },
+        { "type": "add", "text": "export default { id: \"slop-gate\" }" }
+      ] },
+      { "type": "tool", "kind": "call", "text": "recordOwnership(repoRoot, \"slop-gate\", ...)" },
+      { "type": "status", "text": "3 harnesses, 1 template, 0 drift" },
+      { "type": "done", "text": "done in 0.3s" }
+    ],
+    "agentName": "Build",
+    "agentModel": "· claude-opus-4-5",
+    "inputAgent": "Build",
+    "inputModel": "Claude Opus 4.5",
+    "inputProvider": "OpenCode Zen"
+  }
+}
