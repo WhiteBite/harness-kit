@@ -23,8 +23,8 @@ function readText(root, rel) {
   return readFileSync(join(root, rel), 'utf8');
 }
 
-function hasSection(text, version) {
-  return new RegExp(`^##\\s+${version.replace(/\./g, '\\.')}\\b`, 'm').test(text);
+export function hasSection(text, version) {
+  return new RegExp(`^##\\s+${version.replace(/\./g, '\\.')}(?:\\s|$)`, 'm').test(text);
 }
 
 export function nextVersion(version, level) {
@@ -41,6 +41,10 @@ export function nextVersion(version, level) {
 
 export function tagProblem(version, tags) {
   return tags.includes(`v${version}`) ? null : `package version ${version} has no git tag v${version} - run "npm run release"`;
+}
+
+export function tagVersionProblem(version, taggedVersion) {
+  return version === taggedVersion ? null : `tag v${version} points at a commit whose package version is ${taggedVersion} - re-run "npm run release"`;
 }
 
 export function surfaceProblems(root) {
@@ -100,7 +104,8 @@ export function applySync(root) {
   const changelogPath = join(root, CHANGELOG);
   const changelog = readFileSync(changelogPath, 'utf8');
   if (!hasSection(changelog, version)) {
-    const anchor = changelog.indexOf('\n## ');
+    const anchorMatch = /\n##\s+\d/.exec(changelog);
+    const anchor = anchorMatch ? anchorMatch.index : -1;
     const next = anchor === -1
       ? `${changelog.replace(/\n*$/, '\n')}\n## ${version}\n\n- \n`
       : `${changelog.slice(0, anchor + 1)}## ${version}\n\n- \n\n${changelog.slice(anchor + 1)}`;
@@ -116,7 +121,7 @@ function gitTags(root) {
 }
 
 function git(root, args, { inherit = false } = {}) {
-  return execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: inherit ? 'inherit' : 'pipe' });
+  return execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: inherit ? 'inherit' : 'pipe', timeout: 300000, env: { ...process.env, GIT_TERMINAL_PROMPT: '0' } });
 }
 
 function cmdSync(root) {
@@ -153,6 +158,12 @@ function cmdTag(root) {
   const problem = tagProblem(version, gitTags(root));
   if (problem) {
     console.error(`version:tag: ${problem}`);
+    return 1;
+  }
+  const taggedVersion = JSON.parse(git(root, ['show', `v${version}:package.json`])).version;
+  const targetProblem = tagVersionProblem(version, taggedVersion);
+  if (targetProblem) {
+    console.error(`version:tag: ${targetProblem}`);
     return 1;
   }
   console.log(`version:tag: v${version} exists`);

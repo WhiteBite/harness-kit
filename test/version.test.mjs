@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { applySync, cmdBump, cmdRelease, nextVersion, surfaceProblems, tagProblem } from '../scripts/version.mjs';
+import { applySync, cmdBump, cmdRelease, hasSection, nextVersion, surfaceProblems, tagProblem, tagVersionProblem } from '../scripts/version.mjs';
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 
@@ -35,6 +35,17 @@ test('nextVersion bumps each level and accepts an explicit version', () => {
 test('tagProblem flags a version without a matching tag', () => {
   assert.match(tagProblem('0.9.0', []), /no git tag v0\.9\.0/);
   assert.equal(tagProblem('0.9.0', ['v0.9.0']), null);
+});
+
+test('tagVersionProblem flags a tag pointing at the wrong commit', () => {
+  assert.equal(tagVersionProblem('1.10.4', '1.10.4'), null);
+  assert.match(tagVersionProblem('1.10.4', '0.10.0'), /points at a commit whose package version is 0\.10\.0/);
+});
+
+test('hasSection matches the whole version, not a prerelease prefix', () => {
+  assert.equal(hasSection('## 1.10.4\n', '1.10.4'), true);
+  assert.equal(hasSection('## 1.10.4-rc1\n', '1.10.4'), false);
+  assert.equal(hasSection('## 1.10.40\n', '1.10.4'), false);
 });
 
 test('surfaceProblems catches drift and applySync repairs it', () => {

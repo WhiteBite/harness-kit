@@ -11,7 +11,7 @@ npm test              # node --test + selftest: coexistence spike, atomic/templa
 npm run self-test     # registry validation + sabotage fixtures + two-owner merge sweep
 npm run manifest      # regenerate manifest.json after any src/, registry/ or types/ change
 npm run version:check # fail if a version surface drifted from package.json
-npm run release       # sync + commit + tag the current (or bumped) version; publishing runs on tag push
+npm run release       # sync + commit + tag the current (or bumped) version; push with `git push --follow-tags`
 ```
 
 ## Repository map
