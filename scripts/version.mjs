@@ -136,13 +136,13 @@ function cmdCheck(root) {
   return 0;
 }
 
-function cmdBump(root, level) {
+export function cmdBump(root, level) {
   const pkg = readJson(root, PKG);
   const next = nextVersion(pkg.version, level);
   const pkgText = readText(root, PKG);
-  const nextPkg = pkgText.replace(/^(\s*"version": ")[^"]+(")/m, `$1${next}$2`);
-  if (nextPkg === pkgText) throw new Error('bump: package.json has no top-level "version" line');
-  writeFileSync(join(root, PKG), nextPkg, 'utf8');
+  const versionLine = /^(\s*"version": ")[^"]+(")/m;
+  if (!versionLine.test(pkgText)) throw new Error('bump: package.json has no top-level "version" line');
+  writeFileSync(join(root, PKG), pkgText.replace(versionLine, `$1${next}$2`), 'utf8');
   applySync(root);
   console.log(`version:bump: ${level} -> ${next}`);
   return 0;

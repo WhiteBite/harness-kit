@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { applySync, cmdRelease, nextVersion, surfaceProblems, tagProblem } from '../scripts/version.mjs';
+import { applySync, cmdBump, cmdRelease, nextVersion, surfaceProblems, tagProblem } from '../scripts/version.mjs';
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 
@@ -99,6 +99,17 @@ test('a jsonld softwareVersion drift is repaired in place', () => {
   }
 });
 
+test('bumping to the current version is a no-op, not an error', () => {
+  const root = fixture();
+  try {
+    const version = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version;
+    assert.equal(cmdBump(root, version), 0);
+    assert.equal(JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).version, version);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 function gitFixture() {
   const root = fixture();
   const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' });
@@ -114,13 +125,13 @@ function gitFixture() {
 test('release commits every release surface, including the registry', () => {
   const { root, git } = gitFixture();
   try {
-    cmdRelease(root, '1.10.4', { push: false });
+    cmdRelease(root, '9.9.9', { push: false });
     const committed = git('show', '--name-only', '--format=', 'HEAD').trim().split(/\r?\n/);
     for (const surface of ['package.json', 'CITATION.cff', 'docs/jsonld.jsonld', 'registry/harnesses.json', 'manifest.json', 'CHANGELOG.md']) {
       assert.ok(committed.includes(surface), `release commit must include ${surface}`);
     }
     assert.equal(git('status', '--porcelain').trim(), '', 'release must leave a clean tree');
-    assert.match(git('tag', '--list'), /v1\.10\.4/);
+    assert.match(git('tag', '--list'), /v9\.9\.9/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -131,7 +142,7 @@ test('release refuses to run with uncommitted vendored files', () => {
   try {
     mkdirSync(join(root, 'src'), { recursive: true });
     writeFileSync(join(root, 'src', 'scratch.mjs'), 'export const scratch = 1;\n', 'utf8');
-    assert.throws(() => cmdRelease(root, '1.10.4', { push: false }), /uncommitted vendored files/);
+    assert.throws(() => cmdRelease(root, '9.9.9', { push: false }), /uncommitted vendored files/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
