@@ -2,11 +2,12 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const BIN = join(fileURLToPath(new URL('.', import.meta.url)), '..', 'bin', 'harness-kit.mjs');
+const KIT_ROOT = dirname(dirname(BIN));
 
 function run(args) {
   return execFileSync('node', [BIN, ...args], { encoding: 'utf8' });
@@ -43,6 +44,12 @@ test('vendor refuses to overwrite a non-kit directory', () => {
     writeFileSync(join(dir, 'keep.txt'), 'x');
     assert.throws(() => run(['vendor', dir]), /refusing to overwrite/);
   });
+});
+
+test('vendor refuses to vendor into the kit tree or an ancestor of it', () => {
+  assert.throws(() => run(['vendor', KIT_ROOT]), /refusing to vendor into/);
+  assert.throws(() => run(['vendor', '.']), /refusing to vendor into/);
+  assert.throws(() => run(['vendor', dirname(KIT_ROOT)]), /refusing to vendor into/);
 });
 
 test('unknown command exits non-zero', () => {

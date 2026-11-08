@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /** harness-kit CLI: pin, verify, diff and re-vendor a kit copy without any dependency. */
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { computeManifest, hashFile, readManifest } from '../src/manifest.mjs';
 
@@ -104,6 +104,9 @@ function writeLock(target) {
 
 function cmdVendor(dir) {
   const target = resolve(dir);
+  if (target === KIT_ROOT || KIT_ROOT.startsWith(`${target}${sep}`) || target.startsWith(`${KIT_ROOT}${sep}`)) {
+    throw new Error(`refusing to vendor into ${target}: the kit tree itself lives inside it`);
+  }
   if (existsSync(target)) {
     let existing = null;
     try {
@@ -117,7 +120,7 @@ function cmdVendor(dir) {
   }
   rmSync(target, { recursive: true, force: true });
   mkdirSync(target, { recursive: true });
-  for (const item of [...ITEMS, MANIFEST]) {
+  for (const item of [MANIFEST, ...ITEMS]) {
     const from = join(KIT_ROOT, item);
     if (existsSync(from)) cpSync(from, join(target, item), { recursive: true });
   }
