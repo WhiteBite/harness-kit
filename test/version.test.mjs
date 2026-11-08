@@ -148,6 +148,21 @@ test('release commits every release surface, including the registry', () => {
   }
 });
 
+test('release does not commit unrelated files that were already staged', () => {
+  const { root, git } = gitFixture();
+  try {
+    writeFileSync(join(root, 'unrelated.txt'), 'not a release surface\n', 'utf8');
+    git('add', 'unrelated.txt');
+    cmdRelease(root, '9.9.9', { push: false });
+    const committed = git('show', '--name-only', '--format=', 'HEAD').trim().split(/\r?\n/);
+    assert.equal(committed.includes('unrelated.txt'), false);
+    assert.ok(committed.includes('package.json'), 'the release surfaces themselves must land');
+    assert.ok(git('status', '--porcelain').includes('unrelated.txt'), 'the staged file must stay staged for its author');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('release refuses to run with uncommitted vendored files', () => {
   const { root } = gitFixture();
   try {

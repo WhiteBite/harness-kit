@@ -190,7 +190,7 @@ export function cmdRelease(root, level, { push = false } = {}) {
   } catch {
     dirty = true;
   }
-  if (dirty) git(root, ['commit', '-m', `chore: release ${version}`], { inherit: true });
+  if (dirty) git(root, ['commit', '-m', `chore: release ${version}`, '--', ...SURFACES], { inherit: true });
   else console.log('version:release: nothing to commit');
 
   if (gitTags(root).includes(tag)) throw new Error(`release: tag ${tag} already exists; delete it explicitly to re-release`);
