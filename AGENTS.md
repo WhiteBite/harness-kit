@@ -10,6 +10,8 @@ Project: **harness-kit** — canonical registry and zero-dependency primitives f
 npm test              # node --test + selftest: coexistence spike, atomic/template, symlink state machine, registry validation
 npm run self-test     # registry validation + sabotage fixtures + two-owner merge sweep
 npm run manifest      # regenerate manifest.json after any src/, registry/ or types/ change
+npm run manifest:check # fail if manifest.json is stale
+npm run hooks:install  # enable the pre-commit manifest gate (once per clone)
 npm run version:check # fail if a version surface drifted from package.json
 npm run release       # sync + commit + tag the current (or bumped) version; push with `git push --follow-tags`
 ```
@@ -38,6 +40,7 @@ npm run release       # sync + commit + tag the current (or bumped) version; pus
 ## Do / Don't
 
 - **Do** regenerate `manifest.json` in the same commit that changes `src/`, `registry/` or `types/`.
+- **Do** enable the local pre-commit gate once per clone: `npm run hooks:install` (it fails a commit when `manifest.json` lags `src`/`registry`/`types`; bypass with `HARNESS_KIT_SKIP_HOOKS=1`).
 - **Do** keep the registry factual: one reconciled value per fact; disagreements between tools are policy knobs in consumer code, never registry columns.
 - **Do** keep `registryVersion` a mirror of the package `version` (`npm run version:sync` sets both) and add a `CHANGELOG.md` entry for every registry change.
 - **Do** mark unverified harness behavior `status: "experimental"` with a note naming what to verify.

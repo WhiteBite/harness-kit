@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -23,4 +24,8 @@ test('the published tarball ships manifest.json, CHANGELOG.md and docs/', () => 
   for (const required of ['manifest.json', 'CHANGELOG.md', 'docs']) {
     assert.ok(pkg.files.includes(required), `package.json files must include ${required}`);
   }
+});
+
+test('manifest --check passes on a current tree', () => {
+  execFileSync(process.execPath, [join(ROOT, 'scripts', 'manifest.mjs'), '--check'], { stdio: 'pipe' });
 });

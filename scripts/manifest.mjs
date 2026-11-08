@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /** Emits manifest.json: EOL-normalized sha256 of every vendored file. Deterministic - the same tree always produces the same manifest, so consumer sync-checks stay stable. */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { computeManifest } from '../src/manifest.mjs';
@@ -16,5 +16,16 @@ const manifest = {
   registryVersion: registry.registryVersion,
   files,
 };
-writeFileSync(join(ROOT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
-console.log(`manifest.json: ${Object.keys(files).length} files, kit ${manifest.kitVersion}, registry ${manifest.registryVersion}`);
+const serialized = `${JSON.stringify(manifest, null, 2)}\n`;
+const target = join(ROOT, 'manifest.json');
+
+if (process.argv.includes('--check')) {
+  if (!existsSync(target) || readFileSync(target, 'utf8') !== serialized) {
+    console.error(`manifest.json is stale: run "npm run manifest" (${Object.keys(files).length} files, kit ${manifest.kitVersion})`);
+    process.exit(1);
+  }
+  console.log(`manifest.json is current: ${Object.keys(files).length} files, kit ${manifest.kitVersion}, registry ${manifest.registryVersion}`);
+} else {
+  writeFileSync(target, serialized, 'utf8');
+  console.log(`manifest.json: ${Object.keys(files).length} files, kit ${manifest.kitVersion}, registry ${manifest.registryVersion}`);
+}

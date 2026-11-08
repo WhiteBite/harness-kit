@@ -1,0 +1,3 @@
+#!/bin/sh
+[ "$HARNESS_KIT_SKIP_HOOKS" = "1" ] && exit 0
+exec node scripts/manifest.mjs --check
