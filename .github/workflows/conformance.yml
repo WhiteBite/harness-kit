@@ -47,14 +47,26 @@ permissions:
   contents: read
 
 jobs:
+  setup:
+    name: expand matrix
+    runs-on: ubuntu-latest
+    outputs:
+      harnesses: ${{ steps.matrix.outputs.harnesses }}
+    steps:
+      - id: matrix
+        env:
+          HARNESSES: ${{ inputs.harnesses }}
+        run: echo "harnesses=$(node -e 'process.stdout.write(JSON.stringify(process.env.HARNESSES.split(",").map((s) => s.trim()).filter(Boolean)))')" >> "$GITHUB_OUTPUT"
+
   conformance:
+    needs: setup
     name: ${{ matrix.harness }} (${{ inputs.lane }})
     runs-on: ubuntu-latest
     continue-on-error: ${{ inputs.lane == 'latest' }}
     strategy:
       fail-fast: false
       matrix:
-        harness: ${{ fromJSON(format('["{0}"]', replace(inputs.harnesses, ',', '","'))) }}
+        harness: ${{ fromJSON(needs.setup.outputs.harnesses) }}
     steps:
       - name: Checkout caller repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
