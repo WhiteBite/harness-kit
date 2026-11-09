@@ -34,7 +34,8 @@ function writeShellBlock(path, block, opts) {
     next = `${shebang}${block}`;
     action = 'created';
   } else if (pattern.test(current)) {
-    next = current.replace(pattern, block);
+    // string replacement expands $&, $$, $' in the block; a function keeps it verbatim
+    next = current.replace(pattern, () => block);
     action = 'replaced';
   } else {
     next = current.replace(/\n?$/, '\n') + block;

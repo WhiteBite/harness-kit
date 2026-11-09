@@ -82,6 +82,20 @@ test('shell-block: unchanged content still restores the executable bit', { skip:
   }
 });
 
+test('shell-block: a replace keeps $ replacement patterns in the block literal', () => {
+  const dir = temp();
+  try {
+    const path = join(dir, 'pre-commit');
+    const block = '# >>> slop-gate >>>\ntmp=/tmp/gate.$$\nnode x "$&"\n# <<< slop-gate <<<\n';
+    writeMarkerBlock(path, SHELL_BLOCK, { variant: 'shell-block', id: 'slop-gate' });
+    const replaced = writeMarkerBlock(path, block, { variant: 'shell-block', id: 'slop-gate' });
+    assert.equal(replaced.action, 'replaced');
+    assert.equal(readFileSync(path, 'utf8'), `#!/bin/sh\n${block}`);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('html-block: creates, appends, replaces the token span, and tolerates inverted tokens', () => {
   const dir = temp();
   try {
