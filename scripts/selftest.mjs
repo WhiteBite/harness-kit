@@ -433,6 +433,28 @@ check('coexistence sweep: a non-array foreign event value survives verbatim', ()
   assert(swept === 10, `expected exactly 10 event-map merge rows, swept ${swept}`);
 });
 
+check('statuses: every status literal emitted in src is declared in the type union', () => {
+  const declared = new Set();
+  for (const match of readFileSync('types/index.d.mts', 'utf8').matchAll(/export type \w*Status = ([^;]+);/g)) {
+    for (const part of match[1].split('|')) {
+      const token = part.trim();
+      if (/^'[a-z-]+'$/.test(token)) declared.add(token.slice(1, -1));
+    }
+  }
+  const emitted = new Set();
+  for (const file of ['src/doctor.mjs', 'src/drift.mjs']) {
+    const text = readFileSync(file, 'utf8');
+    for (const call of text.matchAll(/finding\((?:[^()]|\([^()]*\))*\)/g)) {
+      for (const literal of call[0].matchAll(/'([a-z-]+)'/g)) emitted.add(literal[1]);
+    }
+    for (const match of text.matchAll(/status: '([a-z-]+)'/g)) emitted.add(match[1]);
+  }
+  const undeclared = [...emitted].filter((status) => !declared.has(status));
+  assert(emitted.has('broken') && emitted.has('ok'), 'status-literal scan found nothing - the extractor drifted');
+  assert(undeclared.length === 0, `status literals not declared in types: ${undeclared.join(', ')}`);
+  assert(declared.has('modified') && declared.has('orphaned'), 'the type union must declare the marker-block content statuses');
+});
+
 check('repo hygiene: no drive-letter paths in src, registry, types, scripts, bin, docs', () => {
   // test/ is out of the scan: its fixtures legitimately carry Windows paths for parser coverage
   const DRIVE_PATH = /[A-Za-z]:\\/;

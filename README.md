@@ -92,6 +92,7 @@ const findings = checkInstall(repoRoot, {
   ].filter(Boolean),
 });
 // [{ surface: 'codex', status: 'ok', detail: null }, { surface: 'git', status: 'stale', detail: '/gone/scan.mjs' }]
+// a marker-block surface may also carry an owner-recorded `expect` block: divergence reports 'modified', a leftover after uninstall reports 'orphaned'
 ```
 
 ## Why choose this

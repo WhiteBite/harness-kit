@@ -30,9 +30,9 @@ function finding(id, status, detail) {
   return { surface: id, status, detail };
 }
 
-/** The writer's replace/append can leave the block with one extra trailing EOL; comparisons ignore it. */
+/** A recorded block can differ from the live one by line-ending style and one trailing EOL the writer/reader shift; compare normalized. */
 function normalizeBlock(text) {
-  return text.replace(/\r?\n$/, '');
+  return text.replace(/\r\n/g, '\n').replace(/\n$/, '');
 }
 
 function checkHookConfigSurface(surface, path, pathExists) {
@@ -53,6 +53,9 @@ function checkHookConfigSurface(surface, path, pathExists) {
 }
 
 function checkMarkerSurface(surface, path, pathExists) {
+  if (surface.expect !== undefined && surface.expect !== null && (typeof surface.expect !== 'string' || surface.expect === '')) {
+    return finding(surface.id, 'broken', null);
+  }
   let content;
   try {
     content = existsSync(path) ? readFileSync(path, 'utf8') : null;

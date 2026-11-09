@@ -36,7 +36,7 @@ npm run release       # sync + commit + tag the current (or bumped) version; pus
 | `src/toml.mjs` | TOML scanner + comment-preserving table splice (`write: "merge-text"`) |
 | `src/marker.mjs` | marker-block writers + shell-block reader |
 | `src/drift.mjs` | hook-command drift classification (broken/missing/stale/ok) |
-| `src/doctor.mjs` | `checkInstall` findings aggregation + git `core.hooksPath` resolver |
+| `src/doctor.mjs` | `checkInstall` findings aggregation (hook-config drift, marker-block content status) + git `core.hooksPath` resolver |
 | `src/manifest.mjs` | deterministic hash-manifest primitives shared by the CLI, scripts and tests |
 | `bin/harness-kit.mjs` | zero-dep CLI: `versions`/`vendor`/`check`/`diff`/`update` |
 | `scripts/selftest.mjs` | sabotage-checked invariants + coexistence sweep + docs-table gates |

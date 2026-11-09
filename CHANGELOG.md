@@ -6,6 +6,7 @@ Keep-a-changelog format. `registryVersion` mirrors the package `version`: there 
 
 - Registry: additive `headless` block on the `claude` and `opencode` rows (durable invocation facts for headless conformance runs), both `status: "experimental"`; the schema declares it with `wire`/`integration` enums and a `stable`-requires-`verified` rule, and self-test gates reject an unknown wire, an unknown or structurally inconsistent `integration`, an unparseable `run`, and a block without `status`/`verified`.
 - `checkInstall` marker-block findings gain content identity: an optional `expect` surface field reports `modified` when the live block diverges from the owner-recorded text, and `expect: null` reports a leftover block as `orphaned` while absence stays `ok`; a matching block still runs the CLI-path check.
+- `checkInstall` marker-block content identity hardened: a non-string or empty `expect` reports `broken` instead of crashing the whole run, comparisons ignore CRLF line endings, and `Finding.status` moves to its own `FindingStatus` union so `checkDrift`'s `DriftResult` no longer advertises the marker-only statuses; self-test now gates every status literal emitted in `src` against the declared union.
 
 ## 2.0.0
 

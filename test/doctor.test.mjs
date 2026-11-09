@@ -152,6 +152,69 @@ test('checkInstall marker-block: expect null sweeps a leftover block as orphaned
   }
 });
 
+test('checkInstall marker-block: content identity ignores line endings and one trailing EOL', () => {
+  const dir = temp();
+  try {
+    const hookPath = join(dir, 'pre-commit');
+    const scanner = join(dir, 'scan.mjs');
+    const written = `# >>> slop-gate >>>\nnode "${scanner}" --staged\n# <<< slop-gate <<<\n`;
+    writeFileSync(hookPath, `#!/bin/sh\n${written}`);
+    assert.deepEqual(
+      checkInstall(dir, { surfaces: [markerSurface({ expect: written.replace(/\n$/, '') })], pathExists: () => true })[0],
+      { surface: 'git', status: 'ok', detail: null },
+      'expect without the trailing EOL still matches',
+    );
+
+    writeFileSync(hookPath, `#!/bin/sh\r\n${written.replace(/\n/g, '\r\n')}`);
+    assert.deepEqual(
+      checkInstall(dir, { surfaces: [markerSurface({ expect: written })], pathExists: () => true })[0],
+      { surface: 'git', status: 'ok', detail: null },
+      'a CRLF checkout stays unmodified',
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('checkInstall marker-block: a string expect reports missing on absence, malformed or empty expect is broken', () => {
+  const dir = temp();
+  try {
+    const hookPath = join(dir, 'pre-commit');
+    const written = `# >>> slop-gate >>>\nnode "/x/scan.mjs" --staged\n# <<< slop-gate <<<\n`;
+    const surface = markerSurface({ expect: written });
+    assert.deepEqual(checkInstall(dir, { surfaces: [surface], pathExists: () => true })[0], { surface: 'git', status: 'missing', detail: null });
+
+    writeFileSync(hookPath, '#!/bin/sh\necho foreign\n');
+    assert.deepEqual(checkInstall(dir, { surfaces: [surface], pathExists: () => true })[0], { surface: 'git', status: 'missing', detail: null });
+
+    assert.deepEqual(checkInstall(dir, { surfaces: [markerSurface({ expect: 42 })], pathExists: () => true })[0], { surface: 'git', status: 'broken', detail: null });
+    assert.deepEqual(checkInstall(dir, { surfaces: [markerSurface({ expect: '' })], pathExists: () => true })[0], { surface: 'git', status: 'broken', detail: null });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('checkInstall marker-block: content drift outranks a rotted path, a live leftover is orphaned, an unreadable target is broken', () => {
+  const dir = temp();
+  try {
+    const hookPath = join(dir, 'pre-commit');
+    const scanner = join(dir, 'scan.mjs');
+    const written = `# >>> slop-gate >>>\nnode "${scanner}" --staged\n# <<< slop-gate <<<\n`;
+    writeFileSync(hookPath, `#!/bin/sh\n${written.replace('--staged', '--edited')}`);
+    assert.deepEqual(checkInstall(dir, { surfaces: [markerSurface({ expect: written })], pathExists: () => false })[0], { surface: 'git', status: 'modified', detail: null });
+
+    writeFileSync(hookPath, `#!/bin/sh\n${written}`);
+    assert.deepEqual(checkInstall(dir, { surfaces: [markerSurface({ expect: null })], pathExists: () => true })[0], { surface: 'git', status: 'orphaned', detail: null });
+
+    rmSync(hookPath);
+    mkdirSync(hookPath, { recursive: true });
+    assert.deepEqual(checkInstall(dir, { surfaces: [markerSurface()] })[0], { surface: 'git', status: 'broken', detail: null });
+    assert.deepEqual(checkInstall(dir, { surfaces: [markerSurface({ expect: null })] })[0], { surface: 'git', status: 'broken', detail: null });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('checkInstall: one finding per surface in order, absolute paths, unknown kinds, empty input', () => {
   const dir = temp();
   try {

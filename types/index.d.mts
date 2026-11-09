@@ -178,7 +178,8 @@ export interface MarkerReadResult {
 /** v1 reads shell blocks only; `text` spans the markers so callers extract inside the block. */
 export function readMarkerBlock(content: string, opts: { variant: 'shell-block'; id: string }): MarkerReadResult;
 
-export type DriftStatus = 'broken' | 'missing' | 'stale' | 'ok' | 'modified' | 'orphaned';
+export type DriftStatus = 'broken' | 'missing' | 'stale' | 'ok';
+export type FindingStatus = DriftStatus | 'modified' | 'orphaned';
 export interface DriftResult {
   status: DriftStatus;
   detail: string | null;
@@ -200,7 +201,7 @@ export function checkDrift(input: CheckDriftInput, options: CheckDriftOpts): Dri
 
 export interface Finding {
   surface: string;
-  status: DriftStatus;
+  status: FindingStatus;
   detail: string | null;
 }
 
@@ -220,7 +221,7 @@ export interface MarkerBlockSurface {
   variant: 'shell-block';
   markerId: string;
   extract?: (text: string) => string | null;
-  /** Owner-recorded block text: a string diverging from the live block reports `modified`, `null` asserts the block is gone (a leftover reports `orphaned`, absence stays `ok`), omitted keeps the CLI-path check. */
+  /** Owner-recorded block text, equal to `readMarkerBlock().text` up to line endings and one trailing EOL: a string diverging from the live block reports `modified`, `null` asserts the block was uninstalled (a leftover reports `orphaned`, absence stays `ok`), omitted keeps the CLI-path check. A matched block still runs the CLI-path check. */
   expect?: string | null;
 }
 
