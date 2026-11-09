@@ -178,7 +178,7 @@ export interface MarkerReadResult {
 /** v1 reads shell blocks only; `text` spans the markers so callers extract inside the block. */
 export function readMarkerBlock(content: string, opts: { variant: 'shell-block'; id: string }): MarkerReadResult;
 
-export type DriftStatus = 'broken' | 'missing' | 'stale' | 'ok';
+export type DriftStatus = 'broken' | 'missing' | 'stale' | 'ok' | 'modified' | 'orphaned';
 export interface DriftResult {
   status: DriftStatus;
   detail: string | null;
@@ -220,6 +220,8 @@ export interface MarkerBlockSurface {
   variant: 'shell-block';
   markerId: string;
   extract?: (text: string) => string | null;
+  /** Owner-recorded block text: a string diverging from the live block reports `modified`, `null` asserts the block is gone (a leftover reports `orphaned`, absence stays `ok`), omitted keeps the CLI-path check. */
+  expect?: string | null;
 }
 
 export type InstallSurface = HookConfigSurface | MarkerBlockSurface;

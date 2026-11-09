@@ -30,6 +30,11 @@ function finding(id, status, detail) {
   return { surface: id, status, detail };
 }
 
+/** The writer's replace/append can leave the block with one extra trailing EOL; comparisons ignore it. */
+function normalizeBlock(text) {
+  return text.replace(/\r?\n$/, '');
+}
+
 function checkHookConfigSurface(surface, path, pathExists) {
   let input;
   try {
@@ -54,14 +59,18 @@ function checkMarkerSurface(surface, path, pathExists) {
   } catch {
     return finding(surface.id, 'broken', null);
   }
-  if (content === null) return finding(surface.id, 'missing', null);
+  if (content === null) return finding(surface.id, surface.expect === null ? 'ok' : 'missing', null);
   let block;
   try {
     block = readMarkerBlock(content, { variant: surface.variant, id: surface.markerId });
   } catch {
     return finding(surface.id, 'broken', null);
   }
-  if (!block.present) return finding(surface.id, 'missing', null);
+  if (!block.present) return finding(surface.id, surface.expect === null ? 'ok' : 'missing', null);
+  if (surface.expect !== undefined) {
+    if (surface.expect === null) return finding(surface.id, 'orphaned', null);
+    if (normalizeBlock(block.text) !== normalizeBlock(surface.expect)) return finding(surface.id, 'modified', null);
+  }
   const extract = surface.extract ?? extractCliPath;
   const cliPath = extract(block.text);
   if (typeof cliPath !== 'string' || cliPath === '') return finding(surface.id, 'stale', null);

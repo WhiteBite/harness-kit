@@ -4,7 +4,7 @@
   "registryVersion": "2.1.0",
   "files": {
     "src/atomic.mjs": "2053c7baecbe1a4d2afe6941a2ef952f57c5396671cda8efc064a86f1a64d5c9",
-    "src/doctor.mjs": "d112f655d1a063ae1e3ac52d5ad62ad0dd8910a1822d82e83e3d13a2d7e67a7f",
+    "src/doctor.mjs": "f8a9d242f6ae20f4f0ef732bf30c9ace7f9feb4f7440cbe3edec2ff842f3d261",
     "src/drift.mjs": "595cd096b025f00128d5aec5b2f828d5408092778807a78e41bda395b7269e5f",
     "src/index.mjs": "b188d8c81fb4845845d73c3c54e9da53d721fd170559a3b2403d2a559f6ba832",
     "src/jsonc.mjs": "143bd2d05257a9ed522b444f4722033eed1034bb560f91f4238331a91c4d8e7c",
@@ -21,6 +21,6 @@
     "registry/CHANGELOG.md": "0794633ba1fa28603e7b4d26134280d932d0ac58a63ec077bc941b5cdc2379f9",
     "registry/harnesses.json": "9b1658562362941bd2257ccbbbae59c37d4f84603a44c7fd7d058f7a4b456508",
     "registry/harnesses.schema.json": "4cbaaf470977a1c5c126bfd43106ad8cf6a031bd315f0326b303e759ac08e3ab",
-    "types/index.d.mts": "c2fb01633964c76501a4325df49210313c3d4d37707b42f044c35336f94b3cfd"
+    "types/index.d.mts": "b75c91c68d7704820e3f772733944437574499a6efc678a9bdb9acab41c11b05"
   }
 }

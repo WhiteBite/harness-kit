@@ -110,6 +110,48 @@ test('checkInstall marker-block: the default extractor stays ts-only over a writ
   }
 });
 
+test('checkInstall marker-block: a block diverging from the owner-recorded text reports modified', () => {
+  const dir = temp();
+  try {
+    const hookPath = join(dir, 'pre-commit');
+    const scanner = join(dir, 'scan.mjs');
+    const written = `# >>> slop-gate >>>\nnode "${scanner}" --staged\n# <<< slop-gate <<<\n`;
+    writeFileSync(hookPath, `#!/bin/sh\n${written}`);
+    const surface = markerSurface({ expect: written });
+
+    assert.deepEqual(checkInstall(dir, { surfaces: [surface], pathExists: () => true })[0], { surface: 'git', status: 'ok', detail: null });
+    assert.deepEqual(
+      checkInstall(dir, { surfaces: [surface], pathExists: (p) => p === scanner })[0],
+      { surface: 'git', status: 'ok', detail: null },
+      'a matching block still runs the CLI-path check',
+    );
+    assert.deepEqual(checkInstall(dir, { surfaces: [surface], pathExists: () => false })[0], { surface: 'git', status: 'stale', detail: scanner });
+
+    writeFileSync(hookPath, `#!/bin/sh\n${written.replace('--staged', '--edited')}`);
+    assert.deepEqual(checkInstall(dir, { surfaces: [surface], pathExists: () => true })[0], { surface: 'git', status: 'modified', detail: null });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('checkInstall marker-block: expect null sweeps a leftover block as orphaned, absence stays clean', () => {
+  const dir = temp();
+  try {
+    const hookPath = join(dir, 'pre-commit');
+    const surface = markerSurface({ expect: null });
+
+    assert.deepEqual(checkInstall(dir, { surfaces: [surface] })[0], { surface: 'git', status: 'ok', detail: null });
+
+    writeFileSync(hookPath, '#!/bin/sh\necho foreign\n');
+    assert.deepEqual(checkInstall(dir, { surfaces: [surface] })[0], { surface: 'git', status: 'ok', detail: null });
+
+    writeFileSync(hookPath, `#!/bin/sh\n# >>> slop-gate >>>\nnode x --staged\n# <<< slop-gate <<<\n`);
+    assert.deepEqual(checkInstall(dir, { surfaces: [surface] })[0], { surface: 'git', status: 'orphaned', detail: null });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('checkInstall: one finding per surface in order, absolute paths, unknown kinds, empty input', () => {
   const dir = temp();
   try {
