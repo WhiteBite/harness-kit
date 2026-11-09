@@ -1,0 +1,54 @@
+{
+  "harnesses": {
+    "claude": {
+      "status": "verified",
+      "versionPin": "latest",
+      "installSpec": "@anthropic-ai/claude-code",
+      "ciFlags": [],
+      "ciEnv": {},
+      "forbiddenFlags": ["--bare"],
+      "mockBasePath": "",
+      "toolVocabulary": {
+        "shell": { "name": "Bash", "arguments": { "command": "{{command}}" } },
+        "read": { "name": "Read", "arguments": { "file_path": "{{path}}" } },
+        "write": { "name": "Write", "arguments": { "file_path": "{{path}}", "content": "{{content}}" } }
+      }
+    },
+    "opencode": {
+      "status": "verified",
+      "versionPin": "latest",
+      "installSpec": "opencode-ai",
+      "ciFlags": [],
+      "ciEnv": {},
+      "forbiddenFlags": [],
+      "mockBasePath": "/v1",
+      "providerConfigPath": "opencode.json",
+      "providerId": "anthropic",
+      "toolVocabulary": {
+        "shell": { "name": "bash", "arguments": { "command": "{{command}}" } },
+        "read": { "name": "read", "arguments": { "filePath": "{{path}}" } },
+        "write": { "name": "write", "arguments": { "filePath": "{{path}}", "content": "{{content}}" } }
+      }
+    },
+    "codex": {
+      "status": "unverified",
+      "note": "registry row has no headless block; run command, prompt delivery and provider override are unverified"
+    },
+    "gemini": {
+      "status": "unverified",
+      "note": "registry row has no headless block; run command, prompt delivery and provider override are unverified"
+    },
+    "crush": {
+      "status": "unverified",
+      "note": "registry row has no headless block; crush refuses to start unconfigured, headless path unverified"
+    },
+    "cline": {
+      "status": "unverified",
+      "note": "registry row has no headless block; --yolo hook-disabling behavior unverified"
+    },
+    "oh-my-pi": {
+      "status": "unverified",
+      "note": "registry row has no headless block; the motivating incident is still uncharacterized"
+    }
+  }
+}

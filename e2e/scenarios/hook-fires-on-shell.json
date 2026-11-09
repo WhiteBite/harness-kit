@@ -1,0 +1,8 @@
+{
+  "id": "hook-fires-on-shell",
+  "prompt": "Run the shell command `exit 1`, then report the exit status.",
+  "turns": [
+    { "toolCalls": [{ "intent": "shell", "arguments": { "command": "exit 1" } }] },
+    { "text": "The command exited with status 1." }
+  ]
+}

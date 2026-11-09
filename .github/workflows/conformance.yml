@@ -1,0 +1,91 @@
+name: conformance
+
+on:
+  workflow_call:
+    inputs:
+      harnesses:
+        description: 'Comma-separated registry row ids to test, no spaces (e.g. "claude,opencode,oh-my-pi")'
+        required: true
+        type: string
+      config:
+        description: 'Path in the caller repo to the conformance contract file'
+        required: true
+        type: string
+      lane:
+        description: 'pinned (PR gate, blocks) or latest (nightly early-warning, non-blocking)'
+        required: false
+        type: string
+        default: pinned
+      scenario:
+        description: 'Optional path in the caller repo to a scenario file'
+        required: false
+        type: string
+        default: ''
+  workflow_dispatch:
+    inputs:
+      harnesses:
+        description: 'Comma-separated registry row ids to test, no spaces'
+        required: true
+        type: string
+      config:
+        description: 'Path to the conformance contract file'
+        required: true
+        type: string
+      lane:
+        description: 'pinned or latest'
+        required: false
+        type: choice
+        options: [pinned, latest]
+        default: pinned
+      scenario:
+        description: 'Optional scenario path'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  conformance:
+    name: ${{ matrix.harness }} (${{ inputs.lane }})
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ inputs.lane == 'latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        harness: ${{ fromJSON(format('["{0}"]', replace(inputs.harnesses, ',', '","'))) }}
+    steps:
+      - name: Checkout caller repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Checkout harness-kit e2e runner
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: ${{ job.workflow_repository }}
+          ref: ${{ job.workflow_sha }}
+          path: .harness-kit
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+      - name: Run conformance
+        env:
+          ANTHROPIC_API_KEY: dummy-key
+          HARNESS: ${{ matrix.harness }}
+          CONFIG: ${{ inputs.config }}
+          LANE: ${{ inputs.lane }}
+          SCENARIO: ${{ inputs.scenario }}
+        run: |
+          set -euo pipefail
+          args=(--harness "$HARNESS" --config "$CONFIG" --lane "$LANE")
+          if [ -n "$SCENARIO" ]; then args+=(--scenario "$SCENARIO"); fi
+          node .harness-kit/e2e/runner.mjs "${args[@]}"
+      - name: Upload result and mock trace
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: conformance-${{ matrix.harness }}-${{ inputs.lane }}
+          path: |
+            conformance-result.json
+            mock-trace.jsonl
+          if-no-files-found: ignore

@@ -1,7 +1,7 @@
 {
   "kit": "@whitebite/harness-kit",
-  "kitVersion": "2.0.0",
-  "registryVersion": "2.0.0",
+  "kitVersion": "2.1.0",
+  "registryVersion": "2.1.0",
   "files": {
     "src/atomic.mjs": "2053c7baecbe1a4d2afe6941a2ef952f57c5396671cda8efc064a86f1a64d5c9",
     "src/doctor.mjs": "d112f655d1a063ae1e3ac52d5ad62ad0dd8910a1822d82e83e3d13a2d7e67a7f",
@@ -18,9 +18,9 @@
     "src/symlink.mjs": "e388b29bed6b4e48eb1f7e9ec177c0e6e72683296f57545780d225f12b8aaf3e",
     "src/template.mjs": "a9293511c66420789e1762c3e083deb8fd195e167e3cd7b3c7ad1d20a26c8af5",
     "src/toml.mjs": "20dac33ad24f2185a975adacd0b5a5e57f718499abd84d007f03b908ba4552d7",
-    "registry/CHANGELOG.md": "56751ae34f0e6477bc0dac6987ad55d0acbf6da91208a0145f658bf7a8f1dc6c",
-    "registry/harnesses.json": "1045d576192a2e6bdfaa32f994844e58b66bad0bd442c4fa9b10f2548ee65509",
-    "registry/harnesses.schema.json": "0ed73b1b977e4bd18ee77b274199333eb03aa9ee1ae63dc2b66426c5191f5507",
+    "registry/CHANGELOG.md": "0794633ba1fa28603e7b4d26134280d932d0ac58a63ec077bc941b5cdc2379f9",
+    "registry/harnesses.json": "9b1658562362941bd2257ccbbbae59c37d4f84603a44c7fd7d058f7a4b456508",
+    "registry/harnesses.schema.json": "4cbaaf470977a1c5c126bfd43106ad8cf6a031bd315f0326b303e759ac08e3ab",
     "types/index.d.mts": "c2fb01633964c76501a4325df49210313c3d4d37707b42f044c35336f94b3cfd"
   }
 }

@@ -2,6 +2,10 @@
 
 Keep-a-changelog format. `registryVersion` mirrors the package `version`: there is one version everywhere (`npm run version:sync` sets it); historical registry-only versions live in `registry/CHANGELOG.md`.
 
+## 2.1.0
+
+- Registry: additive `headless` block on the `claude` and `opencode` rows (durable invocation facts for headless conformance runs), both `status: "experimental"`; the schema declares it with `wire`/`integration` enums and a `stable`-requires-`verified` rule, and self-test gates reject an unknown wire, an unknown or structurally inconsistent `integration`, an unparseable `run`, and a block without `status`/`verified`.
+
 ## 2.0.0
 
 - BREAKING: `linkState` arguments are now `(source, target)`, aligned with `linkDir`/`unlinkDir`.

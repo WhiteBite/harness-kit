@@ -1,0 +1,9 @@
+{
+  "install": "node -e \"const fs=require('fs');fs.mkdirSync('.claude',{recursive:true});fs.writeFileSync('.claude/settings.json',JSON.stringify({hooks:{PreToolUse:[]}}))\"",
+  "assert": "node -e \"process.exit(0)\"",
+  "artifacts": [".claude/settings.json"],
+  "detect": {
+    "integration": { "file": ".claude/settings.json" },
+    "hook": { "traceContains": "scenario" }
+  }
+}

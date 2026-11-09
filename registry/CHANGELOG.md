@@ -4,6 +4,11 @@ Format: keep-a-changelog. From package 0.10.0, `registryVersion` mirrors the pac
 MAJOR removes/renames keys or changes their meaning (a structural break that breaks consumer code), MINOR adds harnesses, fields or additive blocks and also covers fact VALUE changes (a moved path or corrected container - consumer code does not change, the lockfile/`diff` surfaces it), PATCH is notes and typos.
 Keys are never deleted - they are deprecated in place (forward compatibility for vendored consumers).
 
+## 2.1.0
+
+- Add an additive `headless` block to the `claude` and `opencode` rows: durable invocation facts (run, prompt delivery, provider override/wire/auth/model, integration surface) for headless conformance runs. Both rows are `status: "experimental"` with `verified.against: "docs (not yet executed)"` - not yet executed against a live harness.
+- Schema: `headless` is declared with `wire` and `integration` enums and a conditional rule requiring `verified` when `headless.status` is `stable` (mirrors the row-level rule).
+
 ## 2.0.0
 
 No registry STRUCTURAL break rides this version - the changes below are fact corrections (MINOR-class); `registryVersion` mirrors the package major per the one-version policy.

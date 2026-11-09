@@ -1,7 +1,7 @@
 {
   "$schema": "./harnesses.schema.json",
   "schemaVersion": 1,
-  "registryVersion": "2.0.0",
+  "registryVersion": "2.1.0",
   "conventions": {
     "ownership": {
       "sidecar": ".harness-kit/ownership.json",
@@ -24,6 +24,20 @@
       "name": "Claude Code",
       "status": "stable",
       "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
+      "headless": {
+        "run": "claude",
+        "promptDelivery": "arg",
+        "promptFlag": "-p",
+        "provider": {
+          "override": { "kind": "env", "key": "ANTHROPIC_BASE_URL" },
+          "wire": "anthropic-messages",
+          "auth": { "kind": "env", "key": "ANTHROPIC_API_KEY" },
+          "model": "claude-sonnet-4-5"
+        },
+        "integration": "json-hooks",
+        "status": "experimental",
+        "verified": { "against": "docs (not yet executed)", "at": "2026-11-09" }
+      },
       "hooks": {
         "config": { "project": ".claude/settings.json", "user": ".claude/settings.json" },
         "write": "merge",
@@ -86,6 +100,20 @@
       "name": "OpenCode",
       "status": "stable",
       "verified": { "against": "observed in at least one family installer", "at": "2026-10-03" },
+      "headless": {
+        "run": "opencode",
+        "promptDelivery": "arg",
+        "promptFlag": "run",
+        "provider": {
+          "override": { "kind": "config", "key": "providers.<id>.settings.baseURL" },
+          "wire": "openai-chat",
+          "auth": { "kind": "env", "key": "ANTHROPIC_API_KEY" },
+          "model": "claude-sonnet-4-5"
+        },
+        "integration": "code-plugin",
+        "status": "experimental",
+        "verified": { "against": "docs (not yet executed)", "at": "2026-11-09" }
+      },
       "hooks": null,
       "plugin": {
         "stubs": { "user": ".config/opencode/plugins/{name}.ts", "project": ".opencode/plugin/{name}.ts" },

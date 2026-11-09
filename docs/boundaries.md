@@ -18,7 +18,7 @@ harness-kit is the **install substrate**: it answers "how do I write byte X into
 | General JSONC/TOML parsing or editing | No parser ships. The kit only splices one owner-scoped container via hand-rolled span scanners (`write: "merge-text"`) and refuses any file outside that subset. |
 | Command-dir install | No live consumer in the family today; `skills` + `linkDir` cover the real case. |
 | Plugin-manifest read/write | Manifests are static repo artifacts; no runtime consumer. |
-| Runtime harness behavior | The kit never runs inside a harness; install/build-time only. |
+| Runtime harness behavior | The kit never runs inside a harness; install/build-time only. Runtime FACTS (invocation, provider override, wire dialect, integration surface) are in scope as registry data; runtime EXECUTION is not. |
 | Registry server / HTTP API | Static JSON pinned by tag is enough and cacheable. |
 | Parsing `notes` fields | Human-only by contract (AGENTS.md). |
 

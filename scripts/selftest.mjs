@@ -29,6 +29,66 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+const HEADLESS_WIRES = ['anthropic-messages', 'openai-chat', 'openai-responses', 'google-genai'];
+const HEADLESS_INTEGRATIONS = ['json-hooks', 'json-hooks-unsupported-shape', 'config-file-hooks', 'code-plugin', 'composition', 'none'];
+const HEADLESS_DELIVERIES = ['arg', 'stdin', 'file'];
+const HEADLESS_OVERRIDE_KINDS = ['env', 'config'];
+const HEADLESS_STATUSES = ['stable', 'preview', 'experimental'];
+const HEADLESS_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const SHELL_META = /[;&|<>$`(){}[\]*?~!#\\"'\s]/;
+
+function headlessProblems(registry) {
+  const problems = [];
+  for (const [id, entry] of Object.entries(registry.harnesses)) {
+    const headless = entry.headless;
+    if (headless === undefined) continue;
+    if (!headless || typeof headless !== 'object' || Array.isArray(headless)) {
+      problems.push(`${id}: headless must be an object`);
+      continue;
+    }
+    if (typeof headless.run !== 'string' || headless.run === '') problems.push(`${id}: headless.run is required`);
+    else if (SHELL_META.test(headless.run)) problems.push(`${id}: headless.run must not contain shell metacharacters`);
+    if (!HEADLESS_DELIVERIES.includes(headless.promptDelivery)) problems.push(`${id}: headless.promptDelivery must be one of ${HEADLESS_DELIVERIES.join(', ')}`);
+    if (headless.promptFlag !== null && typeof headless.promptFlag !== 'string') problems.push(`${id}: headless.promptFlag must be a string or null`);
+    const provider = headless.provider;
+    if (!provider || typeof provider !== 'object' || Array.isArray(provider)) {
+      problems.push(`${id}: headless.provider is required`);
+    } else {
+      const override = provider.override;
+      if (!override || typeof override !== 'object' || Array.isArray(override)) {
+        problems.push(`${id}: headless.provider.override is required`);
+      } else {
+        if (!HEADLESS_OVERRIDE_KINDS.includes(override.kind)) problems.push(`${id}: headless.provider.override.kind must be one of ${HEADLESS_OVERRIDE_KINDS.join(', ')}`);
+        if (typeof override.key !== 'string' || override.key === '') problems.push(`${id}: headless.provider.override.key is required`);
+      }
+      if (!HEADLESS_WIRES.includes(provider.wire)) problems.push(`${id}: headless.provider.wire must be one of ${HEADLESS_WIRES.join(', ')}`);
+      const auth = provider.auth;
+      if (!auth || typeof auth !== 'object' || Array.isArray(auth)) {
+        problems.push(`${id}: headless.provider.auth is required`);
+      } else {
+        if (!HEADLESS_OVERRIDE_KINDS.includes(auth.kind)) problems.push(`${id}: headless.provider.auth.kind must be one of ${HEADLESS_OVERRIDE_KINDS.join(', ')}`);
+        if (typeof auth.key !== 'string' || auth.key === '') problems.push(`${id}: headless.provider.auth.key is required`);
+      }
+      if (typeof provider.model !== 'string' || provider.model === '') problems.push(`${id}: headless.provider.model is required`);
+    }
+    if (!HEADLESS_INTEGRATIONS.includes(headless.integration)) problems.push(`${id}: headless.integration must be one of ${HEADLESS_INTEGRATIONS.join(', ')}`);
+    if (!HEADLESS_STATUSES.includes(headless.status)) problems.push(`${id}: headless.status must be one of ${HEADLESS_STATUSES.join(', ')}`);
+    if (headless.verified !== undefined && !(headless.verified && typeof headless.verified === 'object' && typeof headless.verified.against === 'string' && headless.verified.against !== '' && HEADLESS_DATE.test(headless.verified.at))) {
+      problems.push(`${id}: headless.verified must be { against, at: YYYY-MM-DD }`);
+    }
+    if (headless.status === 'stable' && headless.verified === undefined) problems.push(`${id}: a stable headless block requires verified provenance`);
+    if (HEADLESS_INTEGRATIONS.includes(headless.integration)) {
+      if (headless.integration.startsWith('json-hooks') && !(entry.hooks && typeof entry.hooks === 'object')) {
+        problems.push(`${id}: headless.integration ${headless.integration} requires a non-null hooks block`);
+      }
+      if (headless.integration === 'code-plugin' && !(entry.plugin && typeof entry.plugin === 'object')) {
+        problems.push(`${id}: headless.integration code-plugin requires a plugin block`);
+      }
+    }
+  }
+  return problems;
+}
+
 const MINE = 'node "/tools/mine/run.js" --mine-flag';
 const THEIRS = 'bun "/tools/theirs/cli.ts" pre --harness x';
 const isMine = (command) => typeof command === 'string' && command.includes('--mine-flag');
@@ -265,6 +325,68 @@ check('sabotage: a malformed verified date is caught', () => {
   bad.harnesses.codex.verified.at = '03-10-2026';
   const problems = validateRegistry(bad);
   assert(problems.some((problem) => problem.includes('codex: verified must be')), `expected a verified problem, got: ${problems.join('; ')}`);
+});
+
+check('headless: claude and opencode declare a valid headless block', () => {
+  const problems = headlessProblems(registry);
+  assert(problems.length === 0, problems.join('; '));
+  const carriers = Object.entries(registry.harnesses).filter(([, entry]) => entry.headless).map(([id]) => id);
+  assert(carriers.length === 2 && carriers.includes('claude') && carriers.includes('opencode'), `headless must be limited to claude and opencode, got: ${carriers.join(', ')}`);
+});
+
+check('headless: unknown wire dialect is caught', () => {
+  assert(headlessProblems(registry).every((problem) => !problem.includes('headless.provider.wire')), 'baseline registry must carry a known wire');
+  const bad = clone(registry);
+  bad.harnesses.claude.headless.provider.wire = 'yolo';
+  const problems = headlessProblems(bad);
+  assert(problems.some((problem) => problem.includes('claude: headless.provider.wire must be one of')), `expected a wire problem, got: ${problems.join('; ')}`);
+});
+
+check('headless: unknown integration is caught', () => {
+  assert(headlessProblems(registry).every((problem) => !problem.includes('headless.integration must be one of')), 'baseline registry must carry a known integration');
+  const bad = clone(registry);
+  bad.harnesses.claude.headless.integration = 'yolo';
+  const problems = headlessProblems(bad);
+  assert(problems.some((problem) => problem.includes('claude: headless.integration must be one of')), `expected an integration problem, got: ${problems.join('; ')}`);
+});
+
+check('headless: integration inconsistent with the row structure is caught', () => {
+  assert(headlessProblems(registry).every((problem) => !problem.includes('requires a')), 'baseline registry must have consistent integrations');
+  const badJsonHooks = clone(registry);
+  badJsonHooks.harnesses.opencode.headless.integration = 'json-hooks';
+  const jsonHooksProblems = headlessProblems(badJsonHooks);
+  assert(jsonHooksProblems.some((problem) => problem.includes('opencode: headless.integration json-hooks requires a non-null hooks block')), `expected a json-hooks consistency problem, got: ${jsonHooksProblems.join('; ')}`);
+
+  const badPlugin = clone(registry);
+  badPlugin.harnesses.claude.headless.integration = 'code-plugin';
+  const pluginProblems = headlessProblems(badPlugin);
+  assert(pluginProblems.some((problem) => problem.includes('claude: headless.integration code-plugin requires a plugin block')), `expected a code-plugin consistency problem, got: ${pluginProblems.join('; ')}`);
+});
+
+check('headless: empty or shell-metacharacter run is caught', () => {
+  assert(headlessProblems(registry).every((problem) => !problem.includes('headless.run')), 'baseline registry must carry a parseable run');
+  const empty = clone(registry);
+  empty.harnesses.claude.headless.run = '';
+  assert(headlessProblems(empty).some((problem) => problem.includes('claude: headless.run is required')), 'expected an empty-run problem');
+
+  const meta = clone(registry);
+  meta.harnesses.claude.headless.run = 'claude; rm -rf /';
+  assert(headlessProblems(meta).some((problem) => problem.includes('claude: headless.run must not contain shell metacharacters')), 'expected a shell-metacharacter problem');
+});
+
+check('headless: a block without status and verified is caught', () => {
+  assert(headlessProblems(registry).every((problem) => !problem.includes('headless.status') && !problem.includes('headless.verified')), 'baseline registry must carry status and verified');
+  const bad = clone(registry);
+  delete bad.harnesses.claude.headless.status;
+  delete bad.harnesses.claude.headless.verified;
+  const problems = headlessProblems(bad);
+  assert(problems.some((problem) => problem.includes('claude: headless.status must be one of')), `expected a status problem, got: ${problems.join('; ')}`);
+
+  const stable = clone(registry);
+  stable.harnesses.claude.headless.status = 'stable';
+  delete stable.harnesses.claude.headless.verified;
+  const stableProblems = headlessProblems(stable);
+  assert(stableProblems.some((problem) => problem.includes('claude: a stable headless block requires verified provenance')), `expected a stable-verified problem, got: ${stableProblems.join('; ')}`);
 });
 
 check('coexistence sweep: two owners merge, reinstall byte-identical, uninstall strips only own', () => {
