@@ -1,0 +1,10 @@
+{
+  "kind": "hero",
+  "palette": "light",
+  "mode": "copy-only",
+
+  "eyebrow": "HARNESS CONFIG REGISTRY",
+  "title": "One registry for\nevery harness",
+  "subtitle": "Config paths, hook dialects and owner-scoped merges in one zero-dependency kit.",
+  "meta": "29 harnesses · 0 runtime deps"
+}

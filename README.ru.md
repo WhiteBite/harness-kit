@@ -4,6 +4,8 @@
 
 > Один канонический реестр и примитивы без зависимостей для подключения AI coding harness'ов — Claude Code, Codex CLI, OpenCode 1.x/2.x, Gemini CLI, Qwen, Cursor, Windsurf, Kiro, Devin, VS Code Copilot, Crush, Cline, Aider, — чтобы инструменты перестали по-своему пересобирать пути конфигов, семантику мержа и symlink-установки.
 
+<p align="center"><img src="./assets/harness-kit-hero.png" width="100%" alt="превью harness-kit: один реестр для 29 AI coding harness'ов без runtime-зависимостей"></p>
+
 ## Быстрый старт
 
 Потребление вендорингом, не runtime-зависимостью: скопируйте `src/`, `registry/`,
