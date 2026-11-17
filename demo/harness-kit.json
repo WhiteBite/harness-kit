@@ -19,10 +19,10 @@
         { "type": "del", "text": "\"matcher\": \"Write|Edit|MultiEdit\"," },
         { "type": "del", "text": "\"hooks\": [{ \"type\": \"command\"," }
       ] },
-      { "type": "file", "path": ".opencode/plugin/slop-gate.ts", "lines": [
-        { "type": "del", "text": "export { default } from \"/abs/slop-gate.js\";" }
+      { "type": "file", "path": ".gemini/settings.json", "lines": [
+        { "type": "del", "text": "\"tools\": [\"write\", \"edit\"]" }
       ] },
-      { "type": "status", "text": "3 harnesses, 3 config files, 3 hand-edits" }
+      { "type": "status", "text": "3 configs, 3 hand-edits" }
     ]
   },
 
@@ -36,7 +36,7 @@
         { "type": "add", "text": "\"write\": \"merge\"," },
         { "type": "add", "text": "\"shape\": \"nested-hooks\"," }
       ] },
-      { "type": "tool", "kind": "call", "text": "mergeHooks(existing, template, { shape, isMine })" },
+      { "type": "tool", "kind": "call", "text": "mergeHooks(existing, template, opts)" },
       { "type": "done", "text": "3 harnesses, 1 registry, 0 drift" }
     ]
   }
